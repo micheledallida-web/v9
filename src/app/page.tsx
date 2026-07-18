@@ -7,31 +7,37 @@ export default function Home() {
       {/* Hero Section */}
       <section className="relative min-h-[calc(100vh-5rem)] flex items-center justify-center px-6 overflow-hidden">
         {/* Subtle grid backdrop */}
-        <div className="absolute inset-0 bg-[linear-gradient(to_right,#1f1f1f_1px,transparent_1px),linear-gradient(to_bottom,#1f1f1f_1px,transparent_1px)] bg-[size:4rem_4rem] [mask-image:radial-gradient(ellipse_60%_50%_at_50%_0%,#000_70%,transparent_100%)] opacity-20" />
-        
+        <div className="absolute inset-0 bg-[linear-gradient(to_right,#1f1f1f_1px,transparent_1px),linear-gradient(to_bottom,#1f1f1f_1px,transparent_1px)] bg-[size:4rem_4rem] [mask-image:radial-gradient(ellipse_at_center,black_35%,transparent_85%)] opacity-30" />
+
         <div className="max-w-4xl mx-auto text-center relative z-20 space-y-8 py-20">
           <div className="inline-flex items-center gap-2 bg-white/5 border border-white/10 px-4 py-1.5 rounded-full text-xs font-medium text-zinc-300">
             <span className="w-2 h-2 rounded-full bg-[#8EF08A] animate-pulse" />
             Next-Gen AI Core Online
           </div>
-          
+
           <h1 className="text-4xl sm:text-6xl lg:text-7xl font-bold tracking-tight text-white leading-[1.1]">
             Build full-stack systems <br />
             <span className="text-transparent bg-clip-text bg-gradient-to-r from-white via-zinc-400 to-[#8EF08A]">
               using natural language.
             </span>
           </h1>
-          
+
           <p className="text-lg text-zinc-400 max-w-2xl mx-auto leading-relaxed">
             Stop fighting boilerplate. Describe your app layout, backend logic, and data structures in simple English. QuickStart generates production-ready code in under 60 seconds.
           </p>
 
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4 pt-4">
-            <a href="#signup" className="w-full sm:w-auto inline-flex items-center justify-center gap-2 bg-[#8EF08A] text-black font-semibold px-8 py-4 rounded-full hover:bg-[#7ad677] transition-all group">
-              Start Building Free 
+            <a
+              href="#signup"
+              className="group w-full sm:w-auto inline-flex items-center justify-center gap-2 bg-[#8EF08A] text-black font-semibold px-8 py-4 rounded-full hover:bg-[#7ad677] transition-all"
+            >
+              Start Building Free
               <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
             </a>
-            <a href="#workflow" className="w-full sm:w-auto inline-flex items-center justify-center bg-white/5 border border-white/10 text-white font-medium px-8 py-4 rounded-full hover:bg-white/10 transition-all">
+            <a
+              href="#workflow"
+              className="w-full sm:w-auto inline-flex items-center justify-center bg-white/5 border border-white/10 text-white font-medium px-8 py-4 rounded-full hover:bg-white/10 transition-all"
+            >
               Watch 2min Demo
             </a>
           </div>
@@ -122,3 +128,5 @@ export default function Home() {
         </div>
       </section>
     </>
+  );
+}
