@@ -1,0 +1,127 @@
+// src/app/AuthenticModal.tsx
+"use client";
+
+import { useState } from "react";
+import { X, Mail, SmartPhone } from "lucide-react";
+
+// NOTE: These placeholder components handle the layout. 
+// If you want to use your full Three.js logic later, you can import it here.
+function Q3DCanvasPlaceholder() {
+  return (
+    <div className="w-16 h-16 rounded-full border border-[#8EF08A]/30 bg-[#8EF08A]/10 flex items-center justify-center animate-spin [animation-duration:8s]">
+      <span className="text-[#8EF08A] font-extrabold text-2xl">Q</span>
+    </div>
+  );
+}
+
+interface AuthModalProps {
+  isOpen: boolean;
+  onClose: () => void;
+}
+
+export default function AuthenticModal({ isOpen, onClose }: AuthModalProps) {
+  if (!isOpen) return null;
+
+  const handleOAuthLogin = (provider: string) => {
+    alert(`Connecting to ${provider} via Supabase... (placeholder)`);
+  };
+
+  return (
+    <div className="fixed inset-0 bg-black/80 backdrop-blur-xl z-[9999] flex items-end sm:items-center justify-center p-0 sm:p-4">
+      
+      {/* Container matching the clean glass structure from your design */}
+      <div className="bg-[#0c0c0c] w-full max-w-md rounded-t-[2rem] sm:rounded-[2rem] p-8 relative border border-white/10 shadow-2xl overflow-y-auto max-h-[95vh]">
+        
+        {/* Close Button Cross */}
+        <button
+          onClick={onClose}
+          className="absolute top-6 left-6 text-zinc-500 hover:text-white transition-colors p-1"
+          aria-label="Close modal"
+        >
+          <X className="w-6 h-6" />
+        </button>
+
+        {/* 1. 3D Spinning Q Logo Section */}
+        <div className="w-full flex justify-center mb-4 mt-4">
+          <Q3DCanvasPlaceholder />
+        </div>
+
+        {/* 2. Headline Core */}
+        <div className="text-center mb-8">
+          <h2 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-white leading-tight">
+            Build Full-Stack <br />
+            <span className="text-[#8EF08A]">Web & Mobile Apps</span> in minutes
+          </h2>
+        </div>
+
+        {/* 3. Primary Google Button Block */}
+        <div className="space-y-4">
+          <button
+            onClick={() => handleOAuthLogin("Google")}
+            className="w-full inline-flex items-center justify-center gap-3 bg-white text-black py-3.5 px-6 rounded-full text-base font-semibold transition-all hover:bg-zinc-200 active:scale-[0.99] shadow-md"
+          >
+            <svg className="w-5 h-5" viewBox="0 0 24 24">
+              <path fill="#EA4335" d="M12.24 10.285V14.4h6.887c-.648 2.41-2.519 4.114-5.136 4.114-3.466 0-6.277-2.81-6.277-6.277 0-3.466 2.81-6.277 6.277-6.277 1.493 0 2.86.52 3.938 1.387l3.076-3.077C18.99 1.94 15.82 1 12.24 1 6.033 1 12.24 1 12.24 12.24s5.033 11.24 11.24 11.24c5.842 0 10.94-4.143 10.94-11.24 0-.668-.063-1.353-.186-1.955H12.24z"/>
+            </svg>
+            <span>Continue with Google</span>
+          </button>
+
+          {/* 4. Horizontal Quick OAuth Grid (GitHub, Apple, Facebook) */}
+          <div className="grid grid-cols-3 gap-3">
+            <button
+              onClick={() => handleOAuthLogin("GitHub")}
+              className="inline-flex items-center justify-center py-3.5 bg-zinc-900 border border-white/10 rounded-full hover:bg-zinc-800 transition-all text-white font-bold text-sm"
+            >
+              GitHub
+            </button>
+
+            <button
+              onClick={() => handleOAuthLogin("Apple")}
+              className="inline-flex items-center justify-center py-3.5 bg-zinc-900 border border-white/10 rounded-full hover:bg-zinc-800 transition-all text-white font-bold text-sm"
+            >
+              Apple
+            </button>
+
+            <button
+              onClick={() => handleOAuthLogin("Facebook")}
+              className="inline-flex items-center justify-center py-3.5 bg-zinc-900 border border-white/10 rounded-full hover:bg-zinc-800 transition-all text-white font-bold text-sm"
+            >
+              Facebook
+            </button>
+          </div>
+
+          {/* Divider Text */}
+          <div className="flex items-center justify-center gap-4 text-[10px] font-bold tracking-widest text-zinc-600 py-2">
+            <div className="h-[1px] bg-white/5 flex-1" />
+            <span>OR</span>
+            <div className="h-[1px] bg-white/5 flex-1" />
+          </div>
+
+          {/* 5. Fallback Methods */}
+          <button 
+            onClick={() => alert("Email link configuration active.")}
+            className="w-full inline-flex items-center justify-center gap-3 bg-zinc-900/50 hover:bg-zinc-900 border border-white/5 py-3.5 px-6 rounded-full text-sm font-medium transition-all text-zinc-300"
+          >
+            <Mail className="w-4 h-4 text-zinc-500" />
+            <span>Continue with Email</span>
+          </button>
+
+          <button 
+            onClick={() => alert("Phone verification active.")}
+            className="w-full inline-flex items-center justify-center gap-3 bg-zinc-900/50 hover:bg-zinc-900 border border-white/5 py-3.5 px-6 rounded-full text-sm font-medium transition-all text-zinc-300"
+          >
+            <SmartPhone className="w-4 h-4 text-zinc-500" />
+            <span>Continue with Phone</span>
+          </button>
+        </div>
+
+        {/* 6. Tiny Legal Disclaimers */}
+        <p className="mt-8 text-center text-xs text-zinc-600 leading-normal px-4">
+          By continuing, you agree to our <br />
+          <a href="#" className="underline text-zinc-400 hover:text-white">Terms of Service</a> and{" "}
+          <a href="#" className="underline text-zinc-400 hover:text-white">Privacy Policy</a>.
+        </p>
+      </div>
+    </div>
+  );
+}
