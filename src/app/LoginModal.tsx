@@ -134,7 +134,7 @@ export default function LoginModal({ isOpen, onClose, onContinueWithEmail }: Log
 
                   {/* Email */}
                   <button
-                    onClick={() => { onClose(); onContinueWithEmail?.(); }}
+                    onClick={() => { onContinueWithEmail?.(); onClose(); }}
                     className="w-full h-[84px] rounded-full border border-white/15 bg-[#161616] text-2xl font-semibold flex items-center justify-center hover:border-white/30 transition"
                   >
                     Continue with Email
