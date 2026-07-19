@@ -1,19 +1,20 @@
 "use client";
 
-import { Apple, ArrowLeft, ArrowRight, Check, ChevronDown, Facebook, Github as GitHubIcon, Search, UserRound } from "lucide-react";
+import { Apple, ArrowLeft, ArrowRight, Check, ChevronDown, Facebook, Github as GitHubIcon, Mail, Search, UserRound } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import countries from "world-countries";
 import Q3DCanvas from "./Q3DCanvas";
+
+type AuthStep = "options" | "email" | "phone";
 
 type LoginModalProps = {
   isOpen: boolean;
   onClose: () => void;
   onProviderAuth: (provider: string) => Promise<void> | void;
-  onProjectDescriptionSubmit: (projectDescription: string) => Promise<void> | void;
+  onProjectDescriptionSubmit: (payload: { name: string; email: string; projectDescription: string }) => Promise<void> | void;
   onPhoneContinue: (payload: { name: string; dialCode: string; phone: string }) => Promise<void> | void;
+  initialStep?: AuthStep;
 };
-
-type AuthStep = "options" | "email" | "phone";
 
 type CountryOption = {
   code: string;
@@ -81,9 +82,10 @@ const COUNTRY_OPTIONS: CountryOption[] = countries
   .filter((country): country is CountryOption => Boolean(country))
   .sort((a, b) => a.name.localeCompare(b.name));
 
-export default function LoginModal({ isOpen, onClose, onProviderAuth, onProjectDescriptionSubmit, onPhoneContinue }: LoginModalProps) {
+export default function LoginModal({ isOpen, onClose, onProviderAuth, onProjectDescriptionSubmit, onPhoneContinue, initialStep }: LoginModalProps) {
   const [authStep, setAuthStep] = useState<AuthStep>("options");
   const [name, setName] = useState("");
+  const [email, setEmail] = useState("");
   const [phone, setPhone] = useState("");
   const [projectDescription, setProjectDescription] = useState("");
   const [countryQuery, setCountryQuery] = useState("");
@@ -92,9 +94,10 @@ export default function LoginModal({ isOpen, onClose, onProviderAuth, onProjectD
 
   useEffect(() => {
     if (!isOpen) return;
-    setAuthStep("options");
+    setAuthStep(initialStep ?? "options");
     setCountryDropdownOpen(false);
     setCountryQuery("");
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isOpen]);
 
   const filteredCountries = useMemo(() => {
@@ -111,6 +114,8 @@ export default function LoginModal({ isOpen, onClose, onProviderAuth, onProjectD
     setAuthStep("options");
     setCountryDropdownOpen(false);
     setCountryQuery("");
+    setName("");
+    setEmail("");
     onClose();
   }
 
@@ -242,10 +247,31 @@ export default function LoginModal({ isOpen, onClose, onProviderAuth, onProjectD
                 <form
                   onSubmit={async (e) => {
                     e.preventDefault();
-                    await onProjectDescriptionSubmit(projectDescription);
+                    await onProjectDescriptionSubmit({ name, email, projectDescription });
                   }}
                   className="space-y-3"
                 >
+                  <div className="h-11 rounded-full border border-white/15 bg-brandSurfaceAccent px-4 flex items-center gap-3">
+                    <UserRound className="h-5 w-5 shrink-0 text-white/45" />
+                    <input
+                      value={name}
+                      onChange={(e) => setName(e.target.value)}
+                      placeholder="Enter your name"
+                      className="w-full bg-transparent text-sm sm:text-base placeholder:text-white/40 outline-none"
+                    />
+                  </div>
+
+                  <div className="h-11 rounded-full border border-white/15 bg-brandSurfaceAccent px-4 flex items-center gap-3">
+                    <Mail className="h-5 w-5 shrink-0 text-white/45" />
+                    <input
+                      type="email"
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
+                      placeholder="Enter your email"
+                      className="w-full bg-transparent text-sm sm:text-base placeholder:text-white/40 outline-none"
+                    />
+                  </div>
+
                   <textarea
                     value={projectDescription}
                     onChange={(e) => setProjectDescription(e.target.value)}
@@ -267,7 +293,7 @@ export default function LoginModal({ isOpen, onClose, onProviderAuth, onProjectD
                       type="submit"
                       className="h-11 flex-1 rounded-full bg-white text-[#151515] text-sm sm:text-base font-semibold tracking-tight flex items-center justify-center gap-2"
                     >
-                      Continue <ArrowRight className="h-4 w-4" />
+                      Get Started <ArrowRight className="h-4 w-4" />
                     </button>
                   </div>
                 </form>

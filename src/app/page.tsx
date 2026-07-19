@@ -204,8 +204,10 @@ function AuthButton({
 
 export default function LandingPage() {
   const [authModalOpen, setAuthModalOpen] = useState(false);
+  const [authModalInitialStep, setAuthModalInitialStep] = useState<"options" | "email" | "phone">("options");
 
-  function openAuthModal() {
+  function openAuthModal(step: "options" | "email" | "phone" = "options") {
+    setAuthModalInitialStep(step);
     setAuthModalOpen(true);
   }
 
@@ -218,8 +220,8 @@ export default function LandingPage() {
     alert(`Authorization request with ${provider} completed. (placeholder — wire up Supabase OAuth here)`);
   }
 
-  async function handleProjectDescriptionSubmit(projectDescription: string) {
-    alert(`Project description submitted: ${projectDescription || "(empty)"}`);
+  async function handleProjectDescriptionSubmit(payload: { name: string; email: string; projectDescription: string }) {
+    alert(`Project description submitted: ${payload.projectDescription || "(empty)"}`);
   }
 
   async function handlePhoneContinue(payload: { name: string; dialCode: string; phone: string }) {
@@ -247,7 +249,7 @@ export default function LandingPage() {
             <a href="#pricing" className="hover:text-white transition-colors duration-200">Pricing</a>
             <a href="#faq" className="hover:text-white transition-colors duration-200">FAQ</a>
           </nav>
-          <button onClick={openAuthModal} className="inline-flex items-center justify-center bg-white text-black px-6 py-2.5 rounded-pill text-sm font-semibold hover:bg-brandGreen transition-all duration-300 hover:scale-[1.02] focus:outline-none focus:ring-2 focus:ring-brandGreen/40 shadow-sm">Get Started</button>
+          <button onClick={() => openAuthModal()} className="inline-flex items-center justify-center bg-white text-black px-6 py-2.5 rounded-pill text-sm font-semibold hover:bg-brandGreen transition-all duration-300 hover:scale-[1.02] focus:outline-none focus:ring-2 focus:ring-brandGreen/40 shadow-sm">Get Started</button>
         </div>
       </header>
 
@@ -270,8 +272,8 @@ export default function LandingPage() {
               <AuthButton onAuth={handleProviderAuth} provider="Facebook" className="inline-flex items-center justify-center gap-2 py-3.5 px-3 bg-brandSurface hover:bg-brandSurfaceAccent border border-brandBorder rounded-pill text-sm font-medium transition-all duration-300 hover:scale-[1.02] focus:outline-none focus:ring-1 focus:ring-white/20"><span>Facebook</span></AuthButton>
             </div>
             <div className="grid grid-cols-2 gap-4">
-              <button onClick={openAuthModal} className="inline-flex items-center justify-center py-4 px-5 bg-brandSurface hover:bg-brandSurfaceAccent border border-brandBorder rounded-pill text-sm font-semibold transition-all duration-300 hover:scale-[1.01] hover:border-brandGreen/40 focus:outline-none focus:ring-1 focus:ring-brandGreen/40">Continue with Email</button>
-              <button onClick={openAuthModal} className="inline-flex items-center justify-center py-4 px-5 bg-brandSurface hover:bg-brandSurfaceAccent border border-brandBorder rounded-pill text-sm font-semibold transition-all duration-300 hover:scale-[1.01] hover:border-brandGreen/40 focus:outline-none focus:ring-1 focus:ring-brandGreen/40">Continue with Phone</button>
+              <button onClick={() => openAuthModal("email")} className="inline-flex items-center justify-center py-4 px-5 bg-brandSurface hover:bg-brandSurfaceAccent border border-brandBorder rounded-pill text-sm font-semibold transition-all duration-300 hover:scale-[1.01] hover:border-brandGreen/40 focus:outline-none focus:ring-1 focus:ring-brandGreen/40">Continue with Email</button>
+              <button onClick={() => openAuthModal("phone")} className="inline-flex items-center justify-center py-4 px-5 bg-brandSurface hover:bg-brandSurfaceAccent border border-brandBorder rounded-pill text-sm font-semibold transition-all duration-300 hover:scale-[1.01] hover:border-brandGreen/40 focus:outline-none focus:ring-1 focus:ring-brandGreen/40">Continue with Phone</button>
             </div>
           </div>
         </section>
@@ -283,6 +285,7 @@ export default function LandingPage() {
         onProviderAuth={handleProviderAuth}
         onProjectDescriptionSubmit={handleProjectDescriptionSubmit}
         onPhoneContinue={handlePhoneContinue}
+        initialStep={authModalInitialStep}
       />
 
       <style>{`
