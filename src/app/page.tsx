@@ -218,7 +218,7 @@ export default function LandingPage() {
     alert(`Authorization request with ${provider} completed. (placeholder — wire up Supabase OAuth here)`);
   }
 
-  async function handleEmailContinue(projectDescription: string) {
+  async function handleProjectDescriptionSubmit(projectDescription: string) {
     alert(`Project description submitted: ${projectDescription || "(empty)"}`);
   }
 
@@ -281,7 +281,7 @@ export default function LandingPage() {
         isOpen={authModalOpen}
         onClose={closeAuthModal}
         onProviderAuth={handleProviderAuth}
-        onEmailContinue={handleEmailContinue}
+        onEmailContinue={handleProjectDescriptionSubmit}
         onPhoneContinue={handlePhoneContinue}
       />
 

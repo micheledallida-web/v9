@@ -220,7 +220,7 @@ export default function LoginModal({ isOpen, onClose, onProviderAuth, onEmailCon
                   <button
                     onClick={() => {
                       setAuthStep("phone");
-                      setCountryDropdownOpen(true);
+                      setCountryDropdownOpen(false);
                     }}
                     className="w-full h-11 sm:h-12 rounded-full border border-white/15 bg-brandSurfaceAccent text-sm sm:text-base font-semibold flex items-center justify-center hover:border-white/30 transition"
                   >
