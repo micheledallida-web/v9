@@ -1,9 +1,5 @@
-FILE: package.json
-LOCATION: repo root
-ACTION: Replace entire file with the content below
 
-{
-  "name": "v10",
+ "name": "v10",
   "private": true,
   "version": "0.1.0",
   "scripts": {
