@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import LoginModal from "./LoginModal";
 import Q3DCanvas from "./Q3DCanvas";
 import {
@@ -172,6 +171,7 @@ const FEATURES = [
 ];
 
 const TECH_TAGS = ["React", "Next.js", "Flutter", "React Native", "Supabase", "Firebase", "Stripe", "PostgreSQL", "Vector Databases", "File Storage", "Cloud Functions", "GitHub Integration", "One Click Deploy"];
+const AUTH_MODAL_QUERY_VALUE = "1";
 
 function AuthButton({ provider, className, children }: { provider: string; className: string; children: React.ReactNode }) {
   const [loading, setLoading] = useState(false);
@@ -193,15 +193,22 @@ function AuthButton({ provider, className, children }: { provider: string; class
 
 export default function LandingPage() {
   const [authModalOpen, setAuthModalOpen] = useState(false);
-  const router = useRouter();
-  const pathname = usePathname();
-  const searchParams = useSearchParams();
 
   useEffect(() => {
-    if (searchParams.get("auth") === "1") {
-      setAuthModalOpen(true);
-    }
-  }, [searchParams]);
+    const syncAuthModalFromUrl = () => {
+      const params = new URLSearchParams(window.location.search);
+      if (params.get("auth") === AUTH_MODAL_QUERY_VALUE) {
+        setAuthModalOpen(true);
+      }
+    };
+
+    syncAuthModalFromUrl();
+    window.addEventListener("popstate", syncAuthModalFromUrl);
+
+    return () => {
+      window.removeEventListener("popstate", syncAuthModalFromUrl);
+    };
+  }, []);
 
   function openAuthModal() {
     setAuthModalOpen(true);
@@ -209,11 +216,11 @@ export default function LandingPage() {
 
   function closeAuthModal() {
     setAuthModalOpen(false);
-    if (searchParams.get("auth") !== "1") return;
-    const params = new URLSearchParams(searchParams.toString());
+    const params = new URLSearchParams(window.location.search);
     params.delete("auth");
     const query = params.toString();
-    router.replace(query ? `${pathname}?${query}` : pathname);
+    const nextUrl = `${window.location.pathname}${query ? `?${query}` : ""}${window.location.hash}`;
+    window.history.replaceState({}, "", nextUrl);
   }
 
   return (
@@ -260,8 +267,8 @@ export default function LandingPage() {
               <AuthButton provider="Facebook" className="inline-flex items-center justify-center gap-2 py-3.5 px-3 bg-brandSurface hover:bg-brandSurfaceAccent border border-brandBorder rounded-pill text-sm font-medium transition-all duration-300 hover:scale-[1.02] focus:outline-none focus:ring-1 focus:ring-white/20"><span>Facebook</span></AuthButton>
             </div>
             <div className="grid grid-cols-2 gap-4">
-              <button onClick={() => setEmailModalOpen(true)} className="inline-flex items-center justify-center py-4 px-5 bg-brandSurface hover:bg-brandSurfaceAccent border border-brandBorder rounded-pill text-sm font-semibold transition-all duration-300 hover:scale-[1.01] hover:border-brandGreen/40 focus:outline-none focus:ring-1 focus:ring-brandGreen/40">Continue with Email</button>
-              <button onClick={() => setPhoneModalOpen(true)} className="inline-flex items-center justify-center py-4 px-5 bg-brandSurface hover:bg-brandSurfaceAccent border border-brandBorder rounded-pill text-sm font-semibold transition-all duration-300 hover:scale-[1.01] hover:border-brandGreen/40 focus:outline-none focus:ring-1 focus:ring-brandGreen/40">Continue with Phone</button>
+              <button onClick={openAuthModal} className="inline-flex items-center justify-center py-4 px-5 bg-brandSurface hover:bg-brandSurfaceAccent border border-brandBorder rounded-pill text-sm font-semibold transition-all duration-300 hover:scale-[1.01] hover:border-brandGreen/40 focus:outline-none focus:ring-1 focus:ring-brandGreen/40">Continue with Email</button>
+              <button onClick={openAuthModal} className="inline-flex items-center justify-center py-4 px-5 bg-brandSurface hover:bg-brandSurfaceAccent border border-brandBorder rounded-pill text-sm font-semibold transition-all duration-300 hover:scale-[1.01] hover:border-brandGreen/40 focus:outline-none focus:ring-1 focus:ring-brandGreen/40">Continue with Phone</button>
             </div>
           </div>
         </section>

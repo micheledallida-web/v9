@@ -1,6 +1,6 @@
 "use client";
 
-import { ArrowLeft, ArrowRight, Check, ChevronDown, Github, Search, UserRound } from "lucide-react";
+import { ArrowLeft, ArrowRight, Check, ChevronDown, Github as GitHubIcon, Search, UserRound } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import countries from "world-countries";
 import Q3DCanvas from "./Q3DCanvas";
@@ -18,6 +18,10 @@ type CountryOption = {
   flag: string;
   dialCode: string;
 };
+
+function generateFlagEmoji(countryCode: string) {
+  return String.fromCodePoint(...countryCode.toUpperCase().split("").map((char) => 127397 + char.charCodeAt(0)));
+}
 
 function ProviderButton({ provider, className, children }: { provider: string; className: string; children: React.ReactNode }) {
   const [loading, setLoading] = useState(false);
@@ -51,7 +55,7 @@ const COUNTRY_OPTIONS: CountryOption[] = countries
     if (!country.cca2 || !country.name?.common || !root || !suffix) return null;
 
     const dialCode = `${root}${suffix}`;
-    const flag = country.flag || String.fromCodePoint(...country.cca2.toUpperCase().split("").map((char) => 127397 + char.charCodeAt(0)));
+    const flag = country.flag || generateFlagEmoji(country.cca2);
 
     return {
       code: country.cca2,
@@ -67,7 +71,7 @@ export default function LoginModal({ isOpen, onClose }: LoginModalProps) {
   const [authStep, setAuthStep] = useState<AuthStep>("options");
   const [name, setName] = useState("");
   const [phone, setPhone] = useState("");
-  const [idea, setIdea] = useState("");
+  const [projectDescription, setProjectDescription] = useState("");
   const [countryQuery, setCountryQuery] = useState("");
   const [countryDropdownOpen, setCountryDropdownOpen] = useState(false);
   const [selectedCountryCode, setSelectedCountryCode] = useState("IN");
@@ -88,6 +92,13 @@ export default function LoginModal({ isOpen, onClose }: LoginModalProps) {
   const selectedCountry = useMemo(() => COUNTRY_OPTIONS.find((country) => country.code === selectedCountryCode) ?? COUNTRY_OPTIONS[0], [selectedCountryCode]);
 
   if (!isOpen) return null;
+
+  function handleClose() {
+    setAuthStep("options");
+    setCountryDropdownOpen(false);
+    setCountryQuery("");
+    onClose();
+  }
 
   const spinningQ = (
     <div className="mb-3 sm:mb-4 flex justify-center">
@@ -143,7 +154,7 @@ export default function LoginModal({ isOpen, onClose }: LoginModalProps) {
           <div className="relative z-10">
             <div className="mb-3 sm:mb-4 flex items-center justify-end">
               <button
-                onClick={onClose}
+                onClick={handleClose}
                 className="h-9 w-9 rounded-full border border-white/20 text-white/80 hover:text-white hover:border-white/40 transition"
                 aria-label="Close login modal"
               >
@@ -169,7 +180,7 @@ export default function LoginModal({ isOpen, onClose }: LoginModalProps) {
                       provider="GitHub"
                       className="h-10 rounded-full border border-white/15 bg-brandSurfaceAccent flex items-center justify-center gap-1 text-xs sm:text-sm font-medium hover:border-white/30 transition disabled:opacity-60"
                     >
-                      <Github className="h-4 w-4 shrink-0" />
+                      <GitHubIcon className="h-4 w-4 shrink-0" />
                       GitHub
                     </ProviderButton>
                     <ProviderButton
@@ -224,13 +235,13 @@ export default function LoginModal({ isOpen, onClose }: LoginModalProps) {
                 <form
                   onSubmit={(e) => {
                     e.preventDefault();
-                    alert(`Idea submitted: ${idea || "(empty)"}`);
+                    alert(`Project description submitted: ${projectDescription || "(empty)"}`);
                   }}
                   className="space-y-3"
                 >
                   <textarea
-                    value={idea}
-                    onChange={(e) => setIdea(e.target.value)}
+                    value={projectDescription}
+                    onChange={(e) => setProjectDescription(e.target.value)}
                     placeholder="Describe your idea, build website and apps in minutes."
                     rows={4}
                     className="w-full resize-none rounded-2xl border border-white/15 bg-brandSurfaceAccent px-4 py-3 text-sm sm:text-base text-white placeholder:text-white/40 outline-none focus:border-brandGreen/50"
@@ -303,7 +314,6 @@ export default function LoginModal({ isOpen, onClose }: LoginModalProps) {
                       <input
                         value={phone}
                         onChange={(e) => setPhone(e.target.value)}
-                        onFocus={() => setCountryDropdownOpen(true)}
                         placeholder="Enter mobile number"
                         className="min-w-0 flex-1 bg-transparent text-sm sm:text-base placeholder:text-white/40 outline-none"
                       />
@@ -326,7 +336,7 @@ export default function LoginModal({ isOpen, onClose }: LoginModalProps) {
                             const isSelected = country.code === selectedCountry?.code;
                             return (
                               <button
-                                key={`${country.code}-${country.dialCode}`}
+                                key={country.code}
                                 type="button"
                                 onClick={() => {
                                   setSelectedCountryCode(country.code);
