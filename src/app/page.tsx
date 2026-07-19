@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import LoginModal from "./LoginModal";
 import Q3DCanvas from "./Q3DCanvas";
 import {
@@ -190,44 +191,30 @@ function AuthButton({ provider, className, children }: { provider: string; class
   );
 }
 
-function AuthModal({ id, title, description, type, placeholder, isOpen, onClose }: { id: string; title: string; description: string; type: string; placeholder: string; isOpen: boolean; onClose: () => void }) {
-  const [loading, setLoading] = useState(false);
+export default function LandingPage() {
+  const [authModalOpen, setAuthModalOpen] = useState(false);
+  const router = useRouter();
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
 
-  function handleSubmit(e: React.FormEvent) {
-    e.preventDefault();
-    setLoading(true);
-    setTimeout(() => {
-      setLoading(false);
-      alert("Authorization code dispatched. (placeholder — wire up Supabase magic link / OTP here)");
-      onClose();
-    }, 2000);
+  useEffect(() => {
+    if (searchParams.get("auth") === "1") {
+      setAuthModalOpen(true);
+    }
+  }, [searchParams]);
+
+  function openAuthModal() {
+    setAuthModalOpen(true);
   }
 
-  if (!isOpen) return null;
-
-  return (
-    <div id={id} className="fixed inset-0 bg-black/80 backdrop-blur-xl z-[9999] flex items-center justify-center p-4">
-      <div className="glass-card max-w-md w-full rounded-premium p-8 relative">
-        <button onClick={onClose} className="absolute top-6 right-6 text-brandTextSec hover:text-white" aria-label="Close modal">
-          <X className="w-6 h-6" />
-        </button>
-        <h3 className="text-xl font-bold text-white mb-2">{title}</h3>
-        <p className="text-brandTextSec text-sm mb-6">{description}</p>
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <input type={type} required placeholder={placeholder} className="w-full bg-brandSurfaceAccent border border-brandBorder rounded-pill py-3 px-5 text-sm text-white placeholder-brandTextSec focus:outline-none focus:border-brandGreen focus:ring-1 focus:ring-brandGreen/30 transition-all duration-300" />
-          <button type="submit" disabled={loading} className="w-full py-3 px-6 bg-brandGreen text-black font-bold rounded-pill text-sm transition-all duration-300 hover:scale-[1.01] hover:bg-white">
-            {loading ? "Sending..." : type === "email" ? "Send Magic Link" : "Send Code"}
-          </button>
-        </form>
-      </div>
-    </div>
-  );
-}
-
-export default function LandingPage() {
-  const [emailModalOpen, setEmailModalOpen] = useState(false);
-  const [phoneModalOpen, setPhoneModalOpen] = useState(false);
-  const [authModalOpen, setAuthModalOpen] = useState(false);
+  function closeAuthModal() {
+    setAuthModalOpen(false);
+    if (searchParams.get("auth") !== "1") return;
+    const params = new URLSearchParams(searchParams.toString());
+    params.delete("auth");
+    const query = params.toString();
+    router.replace(query ? `${pathname}?${query}` : pathname);
+  }
 
   return (
     <div className="bg-brandBg text-white antialiased font-sans overflow-x-hidden selection:bg-brandGreen selection:text-black min-h-screen relative">
@@ -250,7 +237,7 @@ export default function LandingPage() {
             <a href="#pricing" className="hover:text-white transition-colors duration-200">Pricing</a>
             <a href="#faq" className="hover:text-white transition-colors duration-200">FAQ</a>
           </nav>
-          <button onClick={() => setAuthModalOpen(true)} className="inline-flex items-center justify-center bg-white text-black px-6 py-2.5 rounded-pill text-sm font-semibold hover:bg-brandGreen transition-all duration-300 hover:scale-[1.02] focus:outline-none focus:ring-2 focus:ring-brandGreen/40 shadow-sm">Get Started</button>
+          <button onClick={openAuthModal} className="inline-flex items-center justify-center bg-white text-black px-6 py-2.5 rounded-pill text-sm font-semibold hover:bg-brandGreen transition-all duration-300 hover:scale-[1.02] focus:outline-none focus:ring-2 focus:ring-brandGreen/40 shadow-sm">Get Started</button>
         </div>
       </header>
 
@@ -280,9 +267,7 @@ export default function LandingPage() {
         </section>
       </main>
 
-      <LoginModal isOpen={authModalOpen} onClose={() => setAuthModalOpen(false)} onContinueWithEmail={() => { setAuthModalOpen(false); setEmailModalOpen(true); }} />
-      <AuthModal id="email-modal" title="Continue with Email" description="Enter your email address to receive an instant access magic key." type="email" placeholder="name@company.com" isOpen={emailModalOpen} onClose={() => setEmailModalOpen(false)} />
-      <AuthModal id="phone-modal" title="Continue with Phone" description="Enter your phone number to authorize with secure SMS OTP verification." type="tel" placeholder="+1 (555) 000-0000" isOpen={phoneModalOpen} onClose={() => setPhoneModalOpen(false)} />
+      <LoginModal isOpen={authModalOpen} onClose={closeAuthModal} />
 
       <style>{`
         .noise-bg { position: fixed; top: -50%; left: -50%; right: -50%; bottom: -50%; width: 200%; height: 200%; opacity: 0.8; pointer-events: none; z-index: 999; animation: noise-anim 0.2s infinite; }
