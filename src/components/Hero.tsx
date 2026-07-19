@@ -1,0 +1,42 @@
+import React from 'react';
+import { ArrowRight, Shield, Cpu, Zap } from 'lucide-react';
+
+export function Hero() {
+  return (
+    <section className="text-center py-20 px-4">
+      <h1 className="text-5xl font-extrabold tracking-tight sm:text-6xl mb-6 bg-clip-text text-transparent bg-gradient-to-r from-blue-400 to-indigo-500">
+        Build the Future Faster
+      </h1>
+      <p className="max-w-2xl mx-auto text-xl text-slate-400 mb-10">
+        Deploy production-ready applications with unmatched speed, security, and scalability.
+      </p>
+      <div className="flex justify-center gap-4">
+        <button className="bg-indigo-600 hover:bg-indigo-700 text-white py-3 px-6 rounded-lg flex items-center gap-2">
+          Get Started <ArrowRight className="w-5 h-5" />
+        </button>
+      </div>
+    </section>
+  );
+}
+
+export function Features() {
+  return (
+    <section className="grid md:grid-cols-3 gap-8 py-16 max-w-6xl mx-auto px-4">
+      <div className="p-6 bg-slate-800 rounded-xl">
+        <Zap className="w-10 h-10 text-indigo-400 mb-4" />
+        <h3 className="text-xl font-bold mb-2">Blazing Fast</h3>
+        <p className="text-slate-400">Optimized build times and lightning performance.</p>
+      </div>
+      <div className="p-6 bg-slate-800 rounded-xl">
+        <Shield className="w-10 h-10 text-indigo-400 mb-4" />
+        <h3 className="text-xl font-bold mb-2">Secure</h3>
+        <p className="text-slate-400">Built-in protections against vulnerabilities.</p>
+      </div>
+      <div className="p-6 bg-slate-800 rounded-xl">
+        <Cpu className="w-10 h-10 text-indigo-400 mb-4" />
+        <h3 className="text-xl font-bold mb-2">Edge-ready</h3>
+        <p className="text-slate-400">Deploy close to your users globally.</p>
+      </div>
+    </section>
+  );
+}
