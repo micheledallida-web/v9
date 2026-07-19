@@ -1,6 +1,6 @@
 {
-  "name": "quickstart-ai",
-  "version": "0.1.0",
+  "name": "v10",
+  "version": "1.0.0",
   "private": true,
   "scripts": {
     "dev": "next dev",
@@ -9,23 +9,21 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@supabase/ssr": "^0.5.2",
+    "@supabase/supabase-js": "^2.48.0",
+    "lucide-react": "^0.475.0",
     "next": "15.5.20",
-    "react": "^19.0.0",
-    "react-dom": "^19.0.0",
-    "three": "^0.170.0",
-    "lucide-react": "^0.383.0",
-    "@supabase/supabase-js": "^2.45.0",
-    "@supabase/ssr": "^0.5.0"
+    "react": "19.0.0",
+    "react-dom": "19.0.0",
+    "three": "^0.174.0"
   },
   "devDependencies": {
-    "typescript": "^5.5.0",
-    "@types/node": "^20.0.0",
-    "@types/react": "^19.0.0",
-    "@types/react-dom": "^19.0.0",
-    "@types/three": "^0.170.0",
-    "tailwindcss": "^4.0.0",
-    "@tailwindcss/postcss": "^4.0.0",
-    "eslint": "^9.0.0",
-    "eslint-config-next": "15.5.20"
+    "@types/node": "^20.17.19",
+    "@types/react": "^19.0.8",
+    "@types/react-dom": "^19.0.3",
+    "@types/three": "^0.173.0",
+    "postcss": "^8.5.1",
+    "tailwindcss": "^3.4.17",
+    "typescript": "^5.7.3"
   }
 }
