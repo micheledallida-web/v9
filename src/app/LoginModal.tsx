@@ -1,6 +1,6 @@
 "use client";
 
-import { ArrowLeft, ArrowRight, Check, ChevronDown, Github as GitHubIcon, Search, UserRound } from "lucide-react";
+import { Apple, ArrowLeft, ArrowRight, Check, ChevronDown, Facebook, Github as GitHubIcon, Search, UserRound } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import countries from "world-countries";
 import Q3DCanvas from "./Q3DCanvas";
@@ -8,6 +8,9 @@ import Q3DCanvas from "./Q3DCanvas";
 type LoginModalProps = {
   isOpen: boolean;
   onClose: () => void;
+  onProviderAuth: (provider: string) => Promise<void> | void;
+  onEmailContinue: (projectDescription: string) => Promise<void> | void;
+  onPhoneContinue: (payload: { name: string; dialCode: string; phone: string }) => Promise<void> | void;
 };
 
 type AuthStep = "options" | "email" | "phone";
@@ -23,15 +26,26 @@ function generateFlagEmoji(countryCode: string) {
   return String.fromCodePoint(...countryCode.toUpperCase().split("").map((char) => 127397 + char.charCodeAt(0)));
 }
 
-function ProviderButton({ provider, className, children }: { provider: string; className: string; children: React.ReactNode }) {
+function ProviderButton({
+  provider,
+  className,
+  children,
+  onProviderAuth,
+}: {
+  provider: string;
+  className: string;
+  children: React.ReactNode;
+  onProviderAuth: (provider: string) => Promise<void> | void;
+}) {
   const [loading, setLoading] = useState(false);
 
-  function handleClick() {
+  async function handleClick() {
     setLoading(true);
-    setTimeout(() => {
+    try {
+      await onProviderAuth(provider);
+    } finally {
       setLoading(false);
-      alert(`Authorization request with ${provider} completed. (placeholder — wire up Supabase OAuth here)`);
-    }, 1800);
+    }
   }
 
   return (
@@ -67,7 +81,7 @@ const COUNTRY_OPTIONS: CountryOption[] = countries
   .filter((country): country is CountryOption => Boolean(country))
   .sort((a, b) => a.name.localeCompare(b.name));
 
-export default function LoginModal({ isOpen, onClose }: LoginModalProps) {
+export default function LoginModal({ isOpen, onClose, onProviderAuth, onEmailContinue, onPhoneContinue }: LoginModalProps) {
   const [authStep, setAuthStep] = useState<AuthStep>("options");
   const [name, setName] = useState("");
   const [phone, setPhone] = useState("");
@@ -102,10 +116,7 @@ export default function LoginModal({ isOpen, onClose }: LoginModalProps) {
 
   const spinningQ = (
     <div className="mb-3 sm:mb-4 flex justify-center">
-      <div
-        className="w-14 h-14 sm:w-16 sm:h-16"
-        style={{ animation: "spin 3s linear infinite" }}
-      >
+      <div className="w-14 h-14 sm:w-16 sm:h-16">
         <Q3DCanvas className="w-full h-full" scale={0.7} />
       </div>
     </div>
@@ -134,13 +145,6 @@ export default function LoginModal({ isOpen, onClose }: LoginModalProps) {
   );
 
   return (
-    <>
-      <style>{`
-        @keyframes spin {
-          from { transform: rotate(0deg); }
-          to { transform: rotate(360deg); }
-        }
-      `}</style>
       <div className="fixed inset-0 z-[10000] bg-black/80 backdrop-blur-md p-3 sm:p-6 flex items-center justify-center">
         <div className="w-full max-w-md max-h-[90vh] overflow-y-auto rounded-[28px] border border-brandBorder bg-brandSurface p-4 sm:p-6 text-white relative">
           <div
@@ -152,7 +156,7 @@ export default function LoginModal({ isOpen, onClose }: LoginModalProps) {
           />
 
           <div className="relative z-10">
-            <div className="mb-3 sm:mb-4 flex items-center justify-end">
+            <div className="mb-3 sm:mb-4 flex items-center justify-start">
               <button
                 onClick={handleClose}
                 className="h-9 w-9 rounded-full border border-white/20 text-white/80 hover:text-white hover:border-white/40 transition"
@@ -170,6 +174,7 @@ export default function LoginModal({ isOpen, onClose }: LoginModalProps) {
                 <div className="mt-4 sm:mt-6 w-full space-y-2.5 sm:space-y-3">
                   <ProviderButton
                     provider="Google"
+                    onProviderAuth={onProviderAuth}
                     className="w-full h-11 sm:h-12 rounded-full bg-white text-[#151515] text-sm sm:text-base font-semibold flex items-center justify-center gap-3 hover:bg-brandGreen transition disabled:opacity-60"
                   >
                     Continue with Google
@@ -178,22 +183,24 @@ export default function LoginModal({ isOpen, onClose }: LoginModalProps) {
                   <div className="grid grid-cols-3 gap-2">
                     <ProviderButton
                       provider="GitHub"
-                      className="h-10 rounded-full border border-white/15 bg-brandSurfaceAccent flex items-center justify-center gap-1 text-xs sm:text-sm font-medium hover:border-white/30 transition disabled:opacity-60"
+                      onProviderAuth={onProviderAuth}
+                      className="h-10 rounded-full border border-white/15 bg-brandSurfaceAccent flex items-center justify-center hover:border-white/30 transition disabled:opacity-60"
                     >
-                      <GitHubIcon className="h-4 w-4 shrink-0" />
-                      GitHub
+                      <GitHubIcon className="h-5 w-5 shrink-0" />
                     </ProviderButton>
                     <ProviderButton
                       provider="Apple"
-                      className="h-10 rounded-full border border-white/15 bg-brandSurfaceAccent flex items-center justify-center text-xs sm:text-sm font-medium hover:border-white/30 transition disabled:opacity-60"
+                      onProviderAuth={onProviderAuth}
+                      className="h-10 rounded-full border border-white/15 bg-brandSurfaceAccent flex items-center justify-center hover:border-white/30 transition disabled:opacity-60"
                     >
-                      Apple
+                      <Apple className="h-5 w-5" />
                     </ProviderButton>
                     <ProviderButton
                       provider="Facebook"
-                      className="h-10 rounded-full border border-white/15 bg-brandSurfaceAccent flex items-center justify-center text-xs sm:text-sm font-medium hover:border-white/30 transition disabled:opacity-60"
+                      onProviderAuth={onProviderAuth}
+                      className="h-10 rounded-full border border-white/15 bg-brandSurfaceAccent flex items-center justify-center hover:border-white/30 transition disabled:opacity-60"
                     >
-                      Facebook
+                      <Facebook className="h-5 w-5" />
                     </ProviderButton>
                   </div>
 
@@ -233,16 +240,16 @@ export default function LoginModal({ isOpen, onClose }: LoginModalProps) {
                 </div>
 
                 <form
-                  onSubmit={(e) => {
+                  onSubmit={async (e) => {
                     e.preventDefault();
-                    alert(`Project description submitted: ${projectDescription || "(empty)"}`);
+                    await onEmailContinue(projectDescription);
                   }}
                   className="space-y-3"
                 >
                   <textarea
                     value={projectDescription}
                     onChange={(e) => setProjectDescription(e.target.value)}
-                    placeholder="Describe your idea, build website and apps in minutes."
+                    placeholder="Describe your idea, build website and apps in minutes"
                     rows={4}
                     className="w-full resize-none rounded-2xl border border-white/15 bg-brandSurfaceAccent px-4 py-3 text-sm sm:text-base text-white placeholder:text-white/40 outline-none focus:border-brandGreen/50"
                   />
@@ -284,9 +291,13 @@ export default function LoginModal({ isOpen, onClose }: LoginModalProps) {
                 </p>
 
                 <form
-                  onSubmit={(e) => {
+                  onSubmit={async (e) => {
                     e.preventDefault();
-                    alert(`Get code for ${name || "user"} (${selectedCountry?.dialCode || ""} ${phone || "no phone"})`);
+                    await onPhoneContinue({
+                      name,
+                      dialCode: selectedCountry?.dialCode || "",
+                      phone,
+                    });
                   }}
                   className="space-y-3"
                 >
@@ -387,6 +398,5 @@ export default function LoginModal({ isOpen, onClose }: LoginModalProps) {
           </div>
         </div>
       </div>
-    </>
   );
 }

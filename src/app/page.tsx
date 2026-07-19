@@ -171,17 +171,27 @@ const FEATURES = [
 ];
 
 const TECH_TAGS = ["React", "Next.js", "Flutter", "React Native", "Supabase", "Firebase", "Stripe", "PostgreSQL", "Vector Databases", "File Storage", "Cloud Functions", "GitHub Integration", "One Click Deploy"];
-const AUTH_MODAL_QUERY_VALUE = "1";
 
-function AuthButton({ provider, className, children }: { provider: string; className: string; children: React.ReactNode }) {
+function AuthButton({
+  provider,
+  className,
+  children,
+  onAuth,
+}: {
+  provider: string;
+  className: string;
+  children: React.ReactNode;
+  onAuth: (provider: string) => Promise<void> | void;
+}) {
   const [loading, setLoading] = useState(false);
 
-  function handleClick() {
+  async function handleClick() {
     setLoading(true);
-    setTimeout(() => {
+    try {
+      await onAuth(provider);
+    } finally {
       setLoading(false);
-      alert(`Authorization request with ${provider} completed. (placeholder — wire up Supabase OAuth here)`);
-    }, 1800);
+    }
   }
 
   return (
@@ -194,33 +204,25 @@ function AuthButton({ provider, className, children }: { provider: string; class
 export default function LandingPage() {
   const [authModalOpen, setAuthModalOpen] = useState(false);
 
-  useEffect(() => {
-    const syncAuthModalFromUrl = () => {
-      const params = new URLSearchParams(window.location.search);
-      if (params.get("auth") === AUTH_MODAL_QUERY_VALUE) {
-        setAuthModalOpen(true);
-      }
-    };
-
-    syncAuthModalFromUrl();
-    window.addEventListener("popstate", syncAuthModalFromUrl);
-
-    return () => {
-      window.removeEventListener("popstate", syncAuthModalFromUrl);
-    };
-  }, []);
-
   function openAuthModal() {
     setAuthModalOpen(true);
   }
 
   function closeAuthModal() {
     setAuthModalOpen(false);
-    const params = new URLSearchParams(window.location.search);
-    params.delete("auth");
-    const query = params.toString();
-    const nextUrl = `${window.location.pathname}${query ? `?${query}` : ""}${window.location.hash}`;
-    window.history.replaceState({}, "", nextUrl);
+  }
+
+  async function handleProviderAuth(provider: string) {
+    await new Promise((resolve) => setTimeout(resolve, 1800));
+    alert(`Authorization request with ${provider} completed. (placeholder — wire up Supabase OAuth here)`);
+  }
+
+  async function handleEmailContinue(projectDescription: string) {
+    alert(`Project description submitted: ${projectDescription || "(empty)"}`);
+  }
+
+  async function handlePhoneContinue(payload: { name: string; dialCode: string; phone: string }) {
+    alert(`Get code for ${payload.name || "user"} (${payload.dialCode || ""} ${payload.phone || "no phone"})`);
   }
 
   return (
@@ -258,13 +260,13 @@ export default function LandingPage() {
             <p className="mt-6 text-lg md:text-xl text-brandTextSec max-w-2xl mx-auto leading-relaxed">Instantly generate native mobile applications, progressive web apps, production APIs, schema-perfect databases, authentication architectures, AI agents, secure cloud storage, and fully automated deployment configurations using simple natural language.</p>
           </div>
           <div id="signup" className="w-full max-w-md mx-auto mt-12 z-20 reveal-element active space-y-6">
-            <AuthButton provider="Google" className="w-full inline-flex items-center justify-center gap-3 bg-white text-black py-4 px-6 rounded-pill text-base font-semibold transition-all duration-300 hover:bg-brandGreen hover:scale-[1.01] focus:outline-none focus:ring-2 focus:ring-brandGreen/40 shadow-lg group">
+            <AuthButton onAuth={handleProviderAuth} provider="Google" className="w-full inline-flex items-center justify-center gap-3 bg-white text-black py-4 px-6 rounded-pill text-base font-semibold transition-all duration-300 hover:bg-brandGreen hover:scale-[1.01] focus:outline-none focus:ring-2 focus:ring-brandGreen/40 shadow-lg group">
               <span>Continue with Google</span>
             </AuthButton>
             <div className="grid grid-cols-3 gap-3">
-              <AuthButton provider="GitHub" className="inline-flex items-center justify-center gap-2 py-3.5 px-3 bg-brandSurface hover:bg-brandSurfaceAccent border border-brandBorder rounded-pill text-sm font-medium transition-all duration-300 hover:scale-[1.02] focus:outline-none focus:ring-1 focus:ring-white/20"><Github className="w-4 h-4 text-brandGreen shrink-0" /><span>GitHub</span></AuthButton>
-              <AuthButton provider="Apple" className="inline-flex items-center justify-center gap-2 py-3.5 px-3 bg-brandSurface hover:bg-brandSurfaceAccent border border-brandBorder rounded-pill text-sm font-medium transition-all duration-300 hover:scale-[1.02] focus:outline-none focus:ring-1 focus:ring-white/20"><span>Apple</span></AuthButton>
-              <AuthButton provider="Facebook" className="inline-flex items-center justify-center gap-2 py-3.5 px-3 bg-brandSurface hover:bg-brandSurfaceAccent border border-brandBorder rounded-pill text-sm font-medium transition-all duration-300 hover:scale-[1.02] focus:outline-none focus:ring-1 focus:ring-white/20"><span>Facebook</span></AuthButton>
+              <AuthButton onAuth={handleProviderAuth} provider="GitHub" className="inline-flex items-center justify-center gap-2 py-3.5 px-3 bg-brandSurface hover:bg-brandSurfaceAccent border border-brandBorder rounded-pill text-sm font-medium transition-all duration-300 hover:scale-[1.02] focus:outline-none focus:ring-1 focus:ring-white/20"><Github className="w-4 h-4 text-brandGreen shrink-0" /><span>GitHub</span></AuthButton>
+              <AuthButton onAuth={handleProviderAuth} provider="Apple" className="inline-flex items-center justify-center gap-2 py-3.5 px-3 bg-brandSurface hover:bg-brandSurfaceAccent border border-brandBorder rounded-pill text-sm font-medium transition-all duration-300 hover:scale-[1.02] focus:outline-none focus:ring-1 focus:ring-white/20"><span>Apple</span></AuthButton>
+              <AuthButton onAuth={handleProviderAuth} provider="Facebook" className="inline-flex items-center justify-center gap-2 py-3.5 px-3 bg-brandSurface hover:bg-brandSurfaceAccent border border-brandBorder rounded-pill text-sm font-medium transition-all duration-300 hover:scale-[1.02] focus:outline-none focus:ring-1 focus:ring-white/20"><span>Facebook</span></AuthButton>
             </div>
             <div className="grid grid-cols-2 gap-4">
               <button onClick={openAuthModal} className="inline-flex items-center justify-center py-4 px-5 bg-brandSurface hover:bg-brandSurfaceAccent border border-brandBorder rounded-pill text-sm font-semibold transition-all duration-300 hover:scale-[1.01] hover:border-brandGreen/40 focus:outline-none focus:ring-1 focus:ring-brandGreen/40">Continue with Email</button>
@@ -274,7 +276,13 @@ export default function LandingPage() {
         </section>
       </main>
 
-      <LoginModal isOpen={authModalOpen} onClose={closeAuthModal} />
+      <LoginModal
+        isOpen={authModalOpen}
+        onClose={closeAuthModal}
+        onProviderAuth={handleProviderAuth}
+        onEmailContinue={handleEmailContinue}
+        onPhoneContinue={handlePhoneContinue}
+      />
 
       <style>{`
         .noise-bg { position: fixed; top: -50%; left: -50%; right: -50%; bottom: -50%; width: 200%; height: 200%; opacity: 0.8; pointer-events: none; z-index: 999; animation: noise-anim 0.2s infinite; }
