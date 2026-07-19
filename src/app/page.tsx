@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import * as THREE from "three";
+import LoginModal from "./LoginModal";
 import {
   Zap,
   Layout,
@@ -385,6 +386,7 @@ function AuthModal({ id, title, description, type, placeholder, isOpen, onClose 
 export default function LandingPage() {
   const [emailModalOpen, setEmailModalOpen] = useState(false);
   const [phoneModalOpen, setPhoneModalOpen] = useState(false);
+  const [authModalOpen, setAuthModalOpen] = useState(false);
 
   return (
     <div className="bg-brandBg text-white antialiased font-sans overflow-x-hidden selection:bg-brandGreen selection:text-black min-h-screen relative">
@@ -407,7 +409,7 @@ export default function LandingPage() {
             <a href="#pricing" className="hover:text-white transition-colors duration-200">Pricing</a>
             <a href="#faq" className="hover:text-white transition-colors duration-200">FAQ</a>
           </nav>
-          <a href="#signup" className="inline-flex items-center justify-center bg-white text-black px-6 py-2.5 rounded-pill text-sm font-semibold hover:bg-brandGreen transition-all duration-300 hover:scale-[1.02] focus:outline-none focus:ring-2 focus:ring-brandGreen/40 shadow-sm">Get Started</a>
+          <button onClick={() => setAuthModalOpen(true)} className="inline-flex items-center justify-center bg-white text-black px-6 py-2.5 rounded-pill text-sm font-semibold hover:bg-brandGreen transition-all duration-300 hover:scale-[1.02] focus:outline-none focus:ring-2 focus:ring-brandGreen/40 shadow-sm">Get Started</button>
         </div>
       </header>
 
@@ -437,6 +439,7 @@ export default function LandingPage() {
         </section>
       </main>
 
+      <LoginModal isOpen={authModalOpen} onClose={() => setAuthModalOpen(false)} onContinueWithEmail={() => { setAuthModalOpen(false); setEmailModalOpen(true); }} />
       <AuthModal id="email-modal" title="Continue with Email" description="Enter your email address to receive an instant access magic key." type="email" placeholder="name@company.com" isOpen={emailModalOpen} onClose={() => setEmailModalOpen(false)} />
       <AuthModal id="phone-modal" title="Continue with Phone" description="Enter your phone number to authorize with secure SMS OTP verification." type="tel" placeholder="+1 (555) 000-0000" isOpen={phoneModalOpen} onClose={() => setPhoneModalOpen(false)} />
 
