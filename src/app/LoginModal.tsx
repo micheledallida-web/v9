@@ -9,7 +9,7 @@ type LoginModalProps = {
   isOpen: boolean;
   onClose: () => void;
   onProviderAuth: (provider: string) => Promise<void> | void;
-  onEmailContinue: (projectDescription: string) => Promise<void> | void;
+  onProjectDescriptionSubmit: (projectDescription: string) => Promise<void> | void;
   onPhoneContinue: (payload: { name: string; dialCode: string; phone: string }) => Promise<void> | void;
 };
 
@@ -81,7 +81,7 @@ const COUNTRY_OPTIONS: CountryOption[] = countries
   .filter((country): country is CountryOption => Boolean(country))
   .sort((a, b) => a.name.localeCompare(b.name));
 
-export default function LoginModal({ isOpen, onClose, onProviderAuth, onEmailContinue, onPhoneContinue }: LoginModalProps) {
+export default function LoginModal({ isOpen, onClose, onProviderAuth, onProjectDescriptionSubmit, onPhoneContinue }: LoginModalProps) {
   const [authStep, setAuthStep] = useState<AuthStep>("options");
   const [name, setName] = useState("");
   const [phone, setPhone] = useState("");
@@ -242,7 +242,7 @@ export default function LoginModal({ isOpen, onClose, onProviderAuth, onEmailCon
                 <form
                   onSubmit={async (e) => {
                     e.preventDefault();
-                    await onEmailContinue(projectDescription);
+                    await onProjectDescriptionSubmit(projectDescription);
                   }}
                   className="space-y-3"
                 >

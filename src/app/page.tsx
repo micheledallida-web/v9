@@ -281,7 +281,7 @@ export default function LandingPage() {
         isOpen={authModalOpen}
         onClose={closeAuthModal}
         onProviderAuth={handleProviderAuth}
-        onEmailContinue={handleProjectDescriptionSubmit}
+        onProjectDescriptionSubmit={handleProjectDescriptionSubmit}
         onPhoneContinue={handlePhoneContinue}
       />
 
