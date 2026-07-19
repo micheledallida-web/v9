@@ -1,26 +1,22 @@
 {
-  "name": "v10",
+  "name": "typescript-project",
   "private": true,
-  "version": "0.1.0",
+  "version": "1.0.0",
+  "type": "module",
   "scripts": {
-    "dev": "next dev",
-    "build": "next build",
-    "start": "next start",
-    "lint": "next lint"
+    "dev": "vite",
+    "build": "tsc && vite build",
+    "preview": "vite preview"
   },
   "dependencies": {
-    "next": "^15.4.1",
     "react": "^18.3.1",
-    "react-dom": "^18.3.1",
-    "lucide-react": "^0.344.0",
-    "three": "^0.170.0"
+    "react-dom": "^18.3.1"
   },
   "devDependencies": {
+    "@types/node": "20.17.6",
     "@types/react": "^18.3.3",
     "@types/react-dom": "^18.3.0",
-    "typescript": "^5.5.3",
-    "tailwindcss": "^3.4.4",
-    "postcss": "^8.4.39",
-    "autoprefixer": "^10.4.19"
+    "typescript": "^5.2.2",
+    "vite": "^5.3.4"
   }
 }
