@@ -1,6 +1,6 @@
 "use client";
 
-import { Apple, ArrowLeft, ArrowRight, Check, ChevronDown, Eye, EyeOff, Github as GitHubIcon, KeyRound, Mail, Search, UserRound } from "lucide-react";
+import { Apple, ArrowLeft, ArrowRight, Check, ChevronDown, Eye, EyeOff, Github as GitHubIcon, KeyRound, Mail, Phone, Search, UserRound } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import countries from "world-countries";
 import Q3DCanvas from "./Q3DCanvas";
@@ -23,6 +23,41 @@ type CountryOption = {
   flag: string;
   dialCode: string;
 };
+
+function GoogleIcon({ className = "" }: { className?: string }) {
+  return (
+    <svg viewBox="0 0 24 24" aria-hidden="true" className={className}>
+      <path
+        d="M21.805 10.023H12v4.037h5.623c-.533 2.562-2.718 4.037-5.623 4.037A6.096 6.096 0 0 1 5.908 12 6.096 6.096 0 0 1 12 5.903c1.642 0 3.12.62 4.255 1.635l2.858-2.858A9.933 9.933 0 0 0 12 1.75 10.25 10.25 0 0 0 1.75 12 10.25 10.25 0 0 0 12 22.25c5.918 0 10.07-4.158 10.07-10.019 0-.672-.09-1.286-.265-2.208Z"
+        fill="#FFC107"
+      />
+      <path
+        d="M2.93 7.227 6.246 9.66A6.097 6.097 0 0 1 12 5.903c1.642 0 3.12.62 4.255 1.635l2.858-2.858A9.933 9.933 0 0 0 12 1.75c-3.938 0-7.363 2.224-9.07 5.477Z"
+        fill="#FF3D00"
+      />
+      <path
+        d="M12 22.25a9.93 9.93 0 0 0 7-2.72l-3.226-2.728c-.907.694-2.124 1.295-3.774 1.295-2.894 0-5.072-1.456-5.614-4.003l-3.29 2.536A10.248 10.248 0 0 0 12 22.25Z"
+        fill="#4CAF50"
+      />
+      <path
+        d="M21.805 10.023H12v4.037h5.623c-.256 1.232-.947 2.156-1.849 2.844l.001-.001L19 19.625c1.905-1.756 3.07-4.348 3.07-7.394 0-.672-.09-1.286-.265-2.208Z"
+        fill="#1976D2"
+      />
+    </svg>
+  );
+}
+
+function FacebookIcon({ className = "" }: { className?: string }) {
+  return (
+    <svg viewBox="0 0 24 24" aria-hidden="true" className={className}>
+      <circle cx="12" cy="12" r="10" fill="#1877F2" />
+      <path
+        d="M13.35 18v-5.47h1.84l.28-2.13h-2.12V9.04c0-.62.17-1.04 1.05-1.04h1.12V6.09c-.19-.03-.86-.09-1.63-.09-1.61 0-2.72.98-2.72 2.79v1.61H9.35v2.13h1.82V18h2.18Z"
+        fill="#FFFFFF"
+      />
+    </svg>
+  );
+}
 
 function generateFlagEmoji(countryCode: string) {
   return String.fromCodePoint(...countryCode.toUpperCase().split("").map((char) => 127397 + char.charCodeAt(0)));
@@ -165,8 +200,9 @@ export default function LoginModal({ isOpen, onClose, onProviderAuth, onEmailSig
     </p>
   );
 
-  const iconOnlyProviderButtonClass =
-    "h-10 rounded-full border border-white/15 bg-brandSurfaceAccent flex items-center justify-center hover:border-white/30 transition disabled:opacity-60";
+  const providerIconClass = "h-5 w-5 shrink-0";
+  const compactProviderButtonClass =
+    "h-10 rounded-full border border-white/15 bg-brandSurfaceAccent px-3 text-sm font-medium flex items-center justify-center gap-2 hover:border-white/30 transition disabled:opacity-60";
 
   return (
       <div className="fixed inset-0 z-[10000] bg-black/80 backdrop-blur-md p-3 sm:p-6 flex items-center justify-center">
@@ -199,8 +235,9 @@ export default function LoginModal({ isOpen, onClose, onProviderAuth, onEmailSig
                   <ProviderButton
                     provider="Google"
                     onProviderAuth={onProviderAuth}
-                    className="w-full h-11 sm:h-12 rounded-full bg-white text-[#151515] text-sm sm:text-base font-semibold flex items-center justify-center gap-3 hover:bg-brandGreen transition disabled:opacity-60"
+                    className="w-full h-11 sm:h-12 rounded-full bg-white text-[#151515] text-sm sm:text-base font-semibold flex items-center justify-center gap-2 hover:bg-brandGreen transition disabled:opacity-60"
                   >
+                    <GoogleIcon className={providerIconClass} />
                     Continue with Google
                   </ProviderButton>
 
@@ -208,29 +245,26 @@ export default function LoginModal({ isOpen, onClose, onProviderAuth, onEmailSig
                     <ProviderButton
                       provider="GitHub"
                       onProviderAuth={onProviderAuth}
-                      className={iconOnlyProviderButtonClass}
+                      className={compactProviderButtonClass}
                     >
                       <GitHubIcon className="h-5 w-5 shrink-0 text-brandGreen" />
+                      <span>GitHub</span>
                     </ProviderButton>
                     <ProviderButton
                       provider="Apple"
                       onProviderAuth={onProviderAuth}
-                      className={iconOnlyProviderButtonClass}
+                      className={compactProviderButtonClass}
                     >
-                      <Apple className="h-5 w-5 text-white" />
+                      <Apple className={`${providerIconClass} text-white`} />
+                      <span>Apple</span>
                     </ProviderButton>
                     <ProviderButton
                       provider="Facebook"
                       onProviderAuth={onProviderAuth}
-                      className={iconOnlyProviderButtonClass}
+                      className={compactProviderButtonClass}
                     >
-                      <svg viewBox="0 0 24 24" aria-hidden="true" className="h-5 w-5 shrink-0">
-                        <circle cx="12" cy="12" r="10" fill="#1877F2" />
-                        <path
-                          d="M13.35 18v-5.47h1.84l.28-2.13h-2.12V9.04c0-.62.17-1.04 1.05-1.04h1.12V6.09c-.19-.03-.86-.09-1.63-.09-1.61 0-2.72.98-2.72 2.79v1.61H9.35v2.13h1.82V18h2.18Z"
-                          fill="#FFFFFF"
-                        />
-                      </svg>
+                      <FacebookIcon className={providerIconClass} />
+                      <span>Facebook</span>
                     </ProviderButton>
                   </div>
 
@@ -242,8 +276,9 @@ export default function LoginModal({ isOpen, onClose, onProviderAuth, onEmailSig
 
                   <button
                     onClick={() => setAuthStep("email")}
-                    className="w-full h-11 sm:h-12 rounded-full border border-white/15 bg-brandSurfaceAccent text-sm sm:text-base font-semibold flex items-center justify-center hover:border-white/30 transition"
+                    className="w-full h-11 sm:h-12 rounded-full border border-white/15 bg-brandSurfaceAccent text-sm sm:text-base font-semibold flex items-center justify-center gap-2 hover:border-white/30 transition"
                   >
+                    <Mail className={`${providerIconClass} text-white/80`} />
                     Continue with Email
                   </button>
 
@@ -252,8 +287,9 @@ export default function LoginModal({ isOpen, onClose, onProviderAuth, onEmailSig
                       setAuthStep("phone");
                       setCountryDropdownOpen(false);
                     }}
-                    className="w-full h-11 sm:h-12 rounded-full border border-white/15 bg-brandSurfaceAccent text-sm sm:text-base font-semibold flex items-center justify-center hover:border-white/30 transition"
+                    className="w-full h-11 sm:h-12 rounded-full border border-white/15 bg-brandSurfaceAccent text-sm sm:text-base font-semibold flex items-center justify-center gap-2 hover:border-white/30 transition"
                   >
+                    <Phone className={`${providerIconClass} text-white/80`} />
                     Continue with Phone
                   </button>
                 </div>
