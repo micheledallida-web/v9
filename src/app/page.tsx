@@ -1,7 +1,8 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import * as THREE from "three";
+import LoginModal from "./LoginModal";
+import Q3DCanvas from "./Q3DCanvas";
 import {
   Zap,
   Layout,
@@ -116,165 +117,6 @@ function ParticleCanvas() {
   return <canvas ref={canvasRef} id="particle-canvas" className="fixed inset-0 pointer-events-none z-[2] opacity-40" />;
 }
 
-function createQGeometry() {
-  const group = new THREE.Group();
-
-  const silverPBRMaterial = new THREE.MeshPhysicalMaterial({
-    color: 0xcccccc,
-    metalness: 0.98,
-    roughness: 0.15,
-    clearcoat: 1.0,
-    clearcoatRoughness: 0.08,
-    reflectivity: 1.0,
-    flatShading: false,
-  });
-
-  const ringShape = new THREE.Shape();
-  ringShape.absarc(0, 0, 2.0, 0, Math.PI * 2, false);
-
-  const innerHole = new THREE.Path();
-  innerHole.absarc(0, 0, 1.35, 0, Math.PI * 2, true);
-  ringShape.holes.push(innerHole);
-
-  const extrudeSettings = {
-    depth: 0.5,
-    bevelEnabled: true,
-    bevelSegments: 24,
-    steps: 2,
-    bevelSize: 0.06,
-    bevelThickness: 0.06,
-  };
-
-  const ringGeometry = new THREE.ExtrudeGeometry(ringShape, extrudeSettings);
-  ringGeometry.center();
-  const ringMesh = new THREE.Mesh(ringGeometry, silverPBRMaterial);
-  group.add(ringMesh);
-
-  const tailGeo = new THREE.CylinderGeometry(0.35, 0.35, 1.4, 32);
-  const tailMesh = new THREE.Mesh(tailGeo, silverPBRMaterial);
-  tailMesh.rotation.z = -Math.PI / 4;
-  tailMesh.position.set(1.4, -1.4, 0.25);
-  group.add(tailMesh);
-
-  return group;
-}
-
-function Q3DCanvas({ scale = 1, className = "" }: { scale?: number; className?: string }) {
-  const canvasRef = useRef<HTMLCanvasElement | null>(null);
-
-  useEffect(() => {
-    const canvasEl = canvasRef.current;
-    if (!canvasEl) return;
-
-    const scene = new THREE.Scene();
-    const renderer = new THREE.WebGLRenderer({ canvas: canvasEl, alpha: true, antialias: true });
-    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-    renderer.setSize(canvasEl.clientWidth, canvasEl.clientHeight);
-    renderer.toneMapping = THREE.ACESFilmicToneMapping;
-    renderer.toneMappingExposure = 1.0;
-
-    const camera = new THREE.PerspectiveCamera(45, canvasEl.clientWidth / canvasEl.clientHeight, 0.1, 100);
-    camera.position.z = 7;
-
-    const qGroup = createQGeometry();
-    qGroup.scale.set(scale, scale, scale);
-    scene.add(qGroup);
-
-    scene.add(new THREE.AmbientLight(0xffffff, 0.45));
-
-    const keyLight = new THREE.DirectionalLight(0xffffff, 1.8);
-    keyLight.position.set(5, 5, 4);
-    scene.add(keyLight);
-
-    const accentGreenRimLight = new THREE.DirectionalLight(0x8ef08a, 1.5);
-    accentGreenRimLight.position.set(-6, -6, -4);
-    scene.add(accentGreenRimLight);
-
-    const crispBackLight = new THREE.DirectionalLight(0xffffff, 2.0);
-    crispBackLight.position.set(-4, 6, -3);
-    scene.add(crispBackLight);
-
-    const clock = new THREE.Clock();
-    let isDragging = false;
-    let previousMousePosition = { x: 0, y: 0 };
-    let animationId = 0;
-
-    const onMouseDown = (e: MouseEvent) => {
-      isDragging = true;
-      previousMousePosition = { x: e.clientX, y: e.clientY };
-    };
-    const onMouseMove = (e: MouseEvent) => {
-      if (!isDragging) return;
-      const deltaMove = {
-        x: e.clientX - previousMousePosition.x,
-        y: e.clientY - previousMousePosition.y,
-      };
-      qGroup.rotation.y += deltaMove.x * 0.01;
-      qGroup.rotation.x += deltaMove.y * 0.01;
-      previousMousePosition = { x: e.clientX, y: e.clientY };
-    };
-    const onMouseUp = () => {
-      isDragging = false;
-    };
-    const onTouchStart = (e: TouchEvent) => {
-      isDragging = true;
-      if (e.touches[0]) previousMousePosition = { x: e.touches[0].clientX, y: e.touches[0].clientY };
-    };
-    const onTouchMove = (e: TouchEvent) => {
-      if (!isDragging || !e.touches[0]) return;
-      const deltaMove = {
-        x: e.touches[0].clientX - previousMousePosition.x,
-        y: e.touches[0].clientY - previousMousePosition.y,
-      };
-      qGroup.rotation.y += deltaMove.x * 0.01;
-      qGroup.rotation.x += deltaMove.y * 0.01;
-      previousMousePosition = { x: e.touches[0].clientX, y: e.touches[0].clientY };
-    };
-    const onTouchEnd = () => {
-      isDragging = false;
-    };
-    const onResize = () => {
-      camera.aspect = canvasEl.clientWidth / canvasEl.clientHeight;
-      camera.updateProjectionMatrix();
-      renderer.setSize(canvasEl.clientWidth, canvasEl.clientHeight);
-    };
-
-    canvasEl.addEventListener("mousedown", onMouseDown);
-    canvasEl.addEventListener("mousemove", onMouseMove);
-    window.addEventListener("mouseup", onMouseUp);
-    canvasEl.addEventListener("touchstart", onTouchStart);
-    canvasEl.addEventListener("touchmove", onTouchMove);
-    window.addEventListener("touchend", onTouchEnd);
-    window.addEventListener("resize", onResize);
-
-    function renderLoop() {
-      const elapsedTime = clock.getElapsedTime();
-      if (!isDragging) {
-        qGroup.rotation.y = elapsedTime * ((Math.PI * 2) / 11);
-        qGroup.rotation.x = 0.15 + Math.sin(elapsedTime * 0.8) * 0.08;
-        qGroup.position.y = Math.sin(elapsedTime * 1.5) * 0.12;
-      }
-      renderer.render(scene, camera);
-      animationId = requestAnimationFrame(renderLoop);
-    }
-    renderLoop();
-
-    return () => {
-      cancelAnimationFrame(animationId);
-      canvasEl.removeEventListener("mousedown", onMouseDown);
-      canvasEl.removeEventListener("mousemove", onMouseMove);
-      window.removeEventListener("mouseup", onMouseUp);
-      canvasEl.removeEventListener("touchstart", onTouchStart);
-      canvasEl.removeEventListener("touchmove", onTouchMove);
-      window.removeEventListener("touchend", onTouchEnd);
-      window.removeEventListener("resize", onResize);
-      renderer.dispose();
-    };
-  }, [scale]);
-
-  return <canvas ref={canvasRef} className={className} />;
-}
-
 function CustomCursor() {
   const cursorRef = useRef<HTMLDivElement | null>(null);
 
@@ -329,16 +171,96 @@ const FEATURES = [
 ];
 
 const TECH_TAGS = ["React", "Next.js", "Flutter", "React Native", "Supabase", "Firebase", "Stripe", "PostgreSQL", "Vector Databases", "File Storage", "Cloud Functions", "GitHub Integration", "One Click Deploy"];
+const PRICING_TIERS = [
+  {
+    name: "Free",
+    description: "A simple starting point to explore QuickStart.Ai and validate your first product ideas.",
+    price: "$0",
+    ctaLabel: "Get Started",
+    icon: Zap,
+    highlight: false,
+    features: [
+      "Core product building workflows",
+      "Foundational generation and preview tools",
+      "A starter path to explore the platform",
+    ],
+  },
+  {
+    name: "Pro",
+    description: "The most balanced plan for serious builders shipping polished web and mobile experiences.",
+    price: "$15",
+    ctaLabel: "Try QuickStart.Ai",
+    icon: Layout,
+    highlight: true,
+    features: [
+      "Everything in Free, plus:",
+      "Expanded workflows for production-ready app building",
+      "Additional collaboration and automation capabilities",
+    ],
+  },
+  {
+    name: "Premium",
+    description: "A high-touch tier for advanced teams orchestrating larger systems and more complex launches.",
+    price: "$150",
+    ctaLabel: "Get Started",
+    icon: Cpu,
+    highlight: false,
+    features: [
+      "Everything in Pro, plus:",
+      "Advanced platform access for larger delivery needs",
+      "Priority-ready infrastructure and workflow coverage",
+    ],
+  },
+] as const;
 
-function AuthButton({ provider, className, children }: { provider: string; className: string; children: React.ReactNode }) {
+const FOOTER_LINK_COLUMNS = [
+  {
+    title: "Product",
+    links: [
+      { label: "Features", href: "#features" },
+      { label: "Pricing", href: "#pricing" },
+      { label: "Get Started", href: "#signup" },
+    ],
+  },
+  {
+    title: "Company",
+    links: [
+      { label: "About", href: "#" },
+      { label: "Contact", href: "#" },
+      { label: "Careers", href: "#" },
+    ],
+  },
+  {
+    title: "Legal",
+    links: [
+      { label: "Terms of Service", href: "#" },
+      { label: "Privacy Policy", href: "#" },
+    ],
+  },
+] as const;
+
+const AUTH_SIMULATION_DELAY_MS = 1800;
+
+function AuthButton({
+  provider,
+  className,
+  children,
+  onAuth,
+}: {
+  provider: string;
+  className: string;
+  children: React.ReactNode;
+  onAuth: (provider: string) => Promise<void> | void;
+}) {
   const [loading, setLoading] = useState(false);
 
-  function handleClick() {
+  async function handleClick() {
     setLoading(true);
-    setTimeout(() => {
+    try {
+      await onAuth(provider);
+    } finally {
       setLoading(false);
-      alert(`Authorization request with ${provider} completed. (placeholder — wire up Supabase OAuth here)`);
-    }, 1800);
+    }
   }
 
   return (
@@ -348,43 +270,58 @@ function AuthButton({ provider, className, children }: { provider: string; class
   );
 }
 
-function AuthModal({ id, title, description, type, placeholder, isOpen, onClose }: { id: string; title: string; description: string; type: string; placeholder: string; isOpen: boolean; onClose: () => void }) {
-  const [loading, setLoading] = useState(false);
+export default function LandingPage() {
+  const [authModalOpen, setAuthModalOpen] = useState(false);
+  const [authModalInitialStep, setAuthModalInitialStep] = useState<"options" | "email" | "phone" | "signin">("options");
+  const [showGetStartedButton, setShowGetStartedButton] = useState(false);
+  const heroAuthButtonsRowRef = useRef<HTMLDivElement | null>(null);
 
-  function handleSubmit(e: React.FormEvent) {
-    e.preventDefault();
-    setLoading(true);
-    setTimeout(() => {
-      setLoading(false);
-      alert("Authorization code dispatched. (placeholder — wire up Supabase magic link / OTP here)");
-      onClose();
-    }, 2000);
+  useEffect(() => {
+    const heroAuthButtonsRow = heroAuthButtonsRowRef.current;
+    if (!heroAuthButtonsRow) return;
+
+    const updateGetStartedVisibility = () => {
+      setShowGetStartedButton(heroAuthButtonsRow.getBoundingClientRect().bottom <= 0);
+    };
+
+    updateGetStartedVisibility();
+    window.addEventListener("scroll", updateGetStartedVisibility, { passive: true });
+    window.addEventListener("resize", updateGetStartedVisibility);
+
+    return () => {
+      window.removeEventListener("scroll", updateGetStartedVisibility);
+      window.removeEventListener("resize", updateGetStartedVisibility);
+    };
+  }, []);
+
+  function openAuthModal(step: "options" | "email" | "phone" | "signin" = "options") {
+    setAuthModalInitialStep(step);
+    setAuthModalOpen(true);
   }
 
-  if (!isOpen) return null;
+  function closeAuthModal() {
+    setAuthModalOpen(false);
+  }
 
-  return (
-    <div id={id} className="fixed inset-0 bg-black/80 backdrop-blur-xl z-[9999] flex items-center justify-center p-4">
-      <div className="glass-card max-w-md w-full rounded-premium p-8 relative">
-        <button onClick={onClose} className="absolute top-6 right-6 text-brandTextSec hover:text-white" aria-label="Close modal">
-          <X className="w-6 h-6" />
-        </button>
-        <h3 className="text-xl font-bold text-white mb-2">{title}</h3>
-        <p className="text-brandTextSec text-sm mb-6">{description}</p>
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <input type={type} required placeholder={placeholder} className="w-full bg-brandSurfaceAccent border border-brandBorder rounded-pill py-3 px-5 text-sm text-white placeholder-brandTextSec focus:outline-none focus:border-brandGreen focus:ring-1 focus:ring-brandGreen/30 transition-all duration-300" />
-          <button type="submit" disabled={loading} className="w-full py-3 px-6 bg-brandGreen text-black font-bold rounded-pill text-sm transition-all duration-300 hover:scale-[1.01] hover:bg-white">
-            {loading ? "Sending..." : type === "email" ? "Send Magic Link" : "Send Code"}
-          </button>
-        </form>
-      </div>
-    </div>
-  );
-}
+  async function handleProviderAuth(provider: string) {
+    await new Promise((resolve) => setTimeout(resolve, AUTH_SIMULATION_DELAY_MS));
+    alert(`Authorization request with ${provider} completed. (placeholder — wire up Supabase OAuth here)`);
+  }
 
-export default function LandingPage() {
-  const [emailModalOpen, setEmailModalOpen] = useState(false);
-  const [phoneModalOpen, setPhoneModalOpen] = useState(false);
+  async function handleEmailSignUp(payload: { name: string; email: string; password: string }) {
+    await new Promise((resolve) => setTimeout(resolve, AUTH_SIMULATION_DELAY_MS));
+    alert(`Sign-up for ${payload.name} (${payload.email}) — placeholder. Wire up Supabase signUp here.`);
+  }
+
+  async function handleEmailSignIn(payload: { email: string; password: string }) {
+    await new Promise((resolve) => setTimeout(resolve, AUTH_SIMULATION_DELAY_MS));
+    alert(`Sign-in for ${payload.email} — placeholder. Wire up Supabase signInWithPassword here.`);
+  }
+
+  async function handlePhoneContinue(payload: { name: string; dialCode: string; phone: string }) {
+    await new Promise((resolve) => setTimeout(resolve, AUTH_SIMULATION_DELAY_MS));
+    alert(`Get code for ${payload.name || "user"} (${payload.dialCode || ""} ${payload.phone || "no phone"})`);
+  }
 
   return (
     <div className="bg-brandBg text-white antialiased font-sans overflow-x-hidden selection:bg-brandGreen selection:text-black min-h-screen relative">
@@ -407,7 +344,9 @@ export default function LandingPage() {
             <a href="#pricing" className="hover:text-white transition-colors duration-200">Pricing</a>
             <a href="#faq" className="hover:text-white transition-colors duration-200">FAQ</a>
           </nav>
-          <a href="#signup" className="inline-flex items-center justify-center bg-white text-black px-6 py-2.5 rounded-pill text-sm font-semibold hover:bg-brandGreen transition-all duration-300 hover:scale-[1.02] focus:outline-none focus:ring-2 focus:ring-brandGreen/40 shadow-sm">Get Started</a>
+          {showGetStartedButton && (
+            <button onClick={() => openAuthModal()} className="inline-flex items-center justify-center bg-white text-black px-6 py-2.5 rounded-pill text-sm font-semibold hover:bg-brandGreen transition-all duration-300 hover:scale-[1.02] focus:outline-none focus:ring-2 focus:ring-brandGreen/40 shadow-sm">Get Started</button>
+          )}
         </div>
       </header>
 
@@ -421,24 +360,224 @@ export default function LandingPage() {
             <p className="mt-6 text-lg md:text-xl text-brandTextSec max-w-2xl mx-auto leading-relaxed">Instantly generate native mobile applications, progressive web apps, production APIs, schema-perfect databases, authentication architectures, AI agents, secure cloud storage, and fully automated deployment configurations using simple natural language.</p>
           </div>
           <div id="signup" className="w-full max-w-md mx-auto mt-12 z-20 reveal-element active space-y-6">
-            <AuthButton provider="Google" className="w-full inline-flex items-center justify-center gap-3 bg-white text-black py-4 px-6 rounded-pill text-base font-semibold transition-all duration-300 hover:bg-brandGreen hover:scale-[1.01] focus:outline-none focus:ring-2 focus:ring-brandGreen/40 shadow-lg group">
+            <AuthButton onAuth={handleProviderAuth} provider="Google" className="w-full inline-flex items-center justify-center gap-3 bg-white text-black py-4 px-6 rounded-pill text-base font-semibold transition-all duration-300 hover:bg-brandGreen hover:scale-[1.01] focus:outline-none focus:ring-2 focus:ring-brandGreen/40 shadow-lg group">
               <span>Continue with Google</span>
             </AuthButton>
             <div className="grid grid-cols-3 gap-3">
-              <AuthButton provider="GitHub" className="inline-flex items-center justify-center gap-2 py-3.5 px-3 bg-brandSurface hover:bg-brandSurfaceAccent border border-brandBorder rounded-pill text-sm font-medium transition-all duration-300 hover:scale-[1.02] focus:outline-none focus:ring-1 focus:ring-white/20"><Github className="w-4 h-4 text-brandGreen shrink-0" /><span>GitHub</span></AuthButton>
-              <AuthButton provider="Apple" className="inline-flex items-center justify-center gap-2 py-3.5 px-3 bg-brandSurface hover:bg-brandSurfaceAccent border border-brandBorder rounded-pill text-sm font-medium transition-all duration-300 hover:scale-[1.02] focus:outline-none focus:ring-1 focus:ring-white/20"><span>Apple</span></AuthButton>
-              <AuthButton provider="Facebook" className="inline-flex items-center justify-center gap-2 py-3.5 px-3 bg-brandSurface hover:bg-brandSurfaceAccent border border-brandBorder rounded-pill text-sm font-medium transition-all duration-300 hover:scale-[1.02] focus:outline-none focus:ring-1 focus:ring-white/20"><span>Facebook</span></AuthButton>
+              <AuthButton onAuth={handleProviderAuth} provider="GitHub" className="inline-flex items-center justify-center gap-2 py-3.5 px-3 bg-brandSurface hover:bg-brandSurfaceAccent border border-brandBorder rounded-pill text-sm font-medium transition-all duration-300 hover:scale-[1.02] focus:outline-none focus:ring-1 focus:ring-white/20"><Github className="w-4 h-4 text-brandGreen shrink-0" /><span>GitHub</span></AuthButton>
+              <AuthButton onAuth={handleProviderAuth} provider="Apple" className="inline-flex items-center justify-center gap-2 py-3.5 px-3 bg-brandSurface hover:bg-brandSurfaceAccent border border-brandBorder rounded-pill text-sm font-medium transition-all duration-300 hover:scale-[1.02] focus:outline-none focus:ring-1 focus:ring-white/20"><span>Apple</span></AuthButton>
+              <AuthButton onAuth={handleProviderAuth} provider="Facebook" className="inline-flex items-center justify-center gap-2 py-3.5 px-3 bg-brandSurface hover:bg-brandSurfaceAccent border border-brandBorder rounded-pill text-sm font-medium transition-all duration-300 hover:scale-[1.02] focus:outline-none focus:ring-1 focus:ring-white/20"><span>Facebook</span></AuthButton>
             </div>
-            <div className="grid grid-cols-2 gap-4">
-              <button onClick={() => setEmailModalOpen(true)} className="inline-flex items-center justify-center py-4 px-5 bg-brandSurface hover:bg-brandSurfaceAccent border border-brandBorder rounded-pill text-sm font-semibold transition-all duration-300 hover:scale-[1.01] hover:border-brandGreen/40 focus:outline-none focus:ring-1 focus:ring-brandGreen/40">Continue with Email</button>
-              <button onClick={() => setPhoneModalOpen(true)} className="inline-flex items-center justify-center py-4 px-5 bg-brandSurface hover:bg-brandSurfaceAccent border border-brandBorder rounded-pill text-sm font-semibold transition-all duration-300 hover:scale-[1.01] hover:border-brandGreen/40 focus:outline-none focus:ring-1 focus:ring-brandGreen/40">Continue with Phone</button>
+            <div ref={heroAuthButtonsRowRef} className="grid grid-cols-2 gap-4">
+              <button onClick={() => openAuthModal("email")} className="inline-flex items-center justify-center py-4 px-5 bg-brandSurface hover:bg-brandSurfaceAccent border border-brandBorder rounded-pill text-sm font-semibold transition-all duration-300 hover:scale-[1.01] hover:border-brandGreen/40 focus:outline-none focus:ring-1 focus:ring-brandGreen/40">Continue with Email</button>
+              <button onClick={() => openAuthModal("phone")} className="inline-flex items-center justify-center py-4 px-5 bg-brandSurface hover:bg-brandSurfaceAccent border border-brandBorder rounded-pill text-sm font-semibold transition-all duration-300 hover:scale-[1.01] hover:border-brandGreen/40 focus:outline-none focus:ring-1 focus:ring-brandGreen/40">Continue with Phone</button>
+            </div>
+          </div>
+        </section>
+
+        <section id="features" className="px-6 py-24">
+          <div className="max-w-7xl mx-auto space-y-12">
+            <Reveal className="max-w-3xl">
+              <p className="text-sm font-semibold uppercase tracking-[0.28em] text-brandGreen">What is QuickStart.Ai</p>
+              <h2 className="mt-4 text-3xl sm:text-4xl md:text-5xl font-bold tracking-tight text-white">
+                QuickStart.Ai helps teams <span className="text-brandGreen">Build Full-Stack Web &amp; Mobile Apps in Minutes</span>.
+              </h2>
+              <p className="mt-5 text-base sm:text-lg leading-relaxed text-brandTextSec">
+                Instantly generate native mobile applications, progressive web apps, production APIs, schema-perfect databases, authentication architectures, AI agents, secure cloud storage, and fully automated deployment configurations using simple natural language.
+              </p>
+            </Reveal>
+
+            <Reveal>
+              <div className="flex flex-wrap gap-3">
+                {TECH_TAGS.map((tag) => (
+                  <span key={tag} className="rounded-pill border border-brandBorder bg-brandSurface px-4 py-2 text-sm font-medium text-white/80">
+                    {tag}
+                  </span>
+                ))}
+              </div>
+            </Reveal>
+
+            <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
+              {FEATURES.map((feature) => {
+                const Icon = feature.icon;
+
+                return (
+                  <Reveal key={feature.title}>
+                    <article className="glass-card rounded-premium h-full p-6 sm:p-7">
+                      <div className="flex items-start gap-4">
+                        <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl border border-brandBorder bg-brandSurfaceAccent text-brandGreen">
+                          <Icon className="h-5 w-5" />
+                        </div>
+                        <div className="space-y-3">
+                          <p className="text-xs font-semibold uppercase tracking-[0.22em] text-brandGreen/80">{feature.tag}</p>
+                          <h3 className="text-xl font-semibold text-white">{feature.title}</h3>
+                          <p className="text-sm leading-relaxed text-brandTextSec">{feature.desc}</p>
+                        </div>
+                      </div>
+                    </article>
+                  </Reveal>
+                );
+              })}
+            </div>
+          </div>
+        </section>
+
+        <section id="pricing" className="px-6 py-24">
+          <div className="max-w-7xl mx-auto space-y-10">
+            <Reveal className="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
+              <div className="max-w-3xl">
+                <p className="text-sm font-semibold uppercase tracking-[0.28em] text-brandGreen">Pricing</p>
+                <h2 className="mt-4 text-3xl sm:text-4xl md:text-5xl font-bold tracking-tight text-white">
+                  Choose the plan that fits your build velocity.
+                </h2>
+                <p className="mt-5 text-base sm:text-lg leading-relaxed text-brandTextSec">
+                  Dark, cinematic, and built to scale with the same QuickStart.Ai product experience you see above.
+                </p>
+              </div>
+
+              <div className="inline-flex items-center rounded-pill border border-brandBorder bg-brandSurface p-1 text-sm">
+                <button type="button" className="rounded-pill bg-white px-4 py-2 font-semibold text-black">
+                  Monthly
+                </button>
+                <button type="button" disabled className="rounded-pill px-4 py-2 font-semibold text-white/45">
+                  Annual Soon
+                </button>
+              </div>
+            </Reveal>
+
+            <div className="grid gap-6 xl:grid-cols-3">
+              {PRICING_TIERS.map((tier) => {
+                const Icon = tier.icon;
+
+                return (
+                  <Reveal key={tier.name} className="h-full">
+                    <article
+                      className={`glass-card rounded-premium relative flex h-full flex-col p-6 sm:p-8 ${tier.highlight ? "pro-glow-border border border-brandGreen/40 bg-brandSurfaceAccent shadow-[0_25px_80px_-40px_rgba(142,240,138,0.55)] xl:-translate-y-3" : ""}`}
+                    >
+                      {tier.highlight && (
+                        <span className="mb-6 inline-flex w-fit rounded-pill border border-brandGreen/30 bg-brandGreen/10 px-3 py-1 text-xs font-semibold uppercase tracking-[0.22em] text-brandGreen">
+                          Most Popular
+                        </span>
+                      )}
+
+                      <div className="flex items-start justify-between gap-4">
+                        <div>
+                          <h3 className="text-2xl font-semibold text-white">{tier.name}</h3>
+                          <p className="mt-3 text-sm leading-relaxed text-brandTextSec">{tier.description}</p>
+                        </div>
+                        <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl border border-brandBorder bg-brandSurface text-brandGreen">
+                          <Icon className="h-5 w-5" />
+                        </div>
+                      </div>
+
+                      <div className="mt-8 flex items-end gap-2">
+                        <span className="text-5xl font-bold tracking-tight text-white">{tier.price}</span>
+                        <span className="pb-1 text-sm font-medium text-brandGreen">/ month</span>
+                      </div>
+
+                      <div className="mt-8 flex-1">
+                        <ul className="space-y-4 text-sm text-brandTextSec">
+                          {/* Placeholder pricing features only — replace these with final tier details once confirmed. */}
+                          {tier.features.map((feature) => (
+                            <li key={feature} className="flex items-start gap-3">
+                              <span className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-brandGreen/10 text-brandGreen">
+                                <Check className="h-3.5 w-3.5" />
+                              </span>
+                              <span className="leading-relaxed">{feature}</span>
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+
+                      <button
+                        type="button"
+                        onClick={() => openAuthModal()}
+                        className={`mt-8 inline-flex w-full items-center justify-center rounded-pill px-5 py-3.5 text-sm font-semibold transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-brandGreen/40 ${tier.highlight ? "bg-brandGreen text-black hover:bg-white" : "border border-brandBorder bg-brandSurface text-white hover:border-brandGreen/40 hover:bg-brandSurfaceAccent"}`}
+                      >
+                        {tier.ctaLabel}
+                      </button>
+                    </article>
+                  </Reveal>
+                );
+              })}
             </div>
           </div>
         </section>
       </main>
 
-      <AuthModal id="email-modal" title="Continue with Email" description="Enter your email address to receive an instant access magic key." type="email" placeholder="name@company.com" isOpen={emailModalOpen} onClose={() => setEmailModalOpen(false)} />
-      <AuthModal id="phone-modal" title="Continue with Phone" description="Enter your phone number to authorize with secure SMS OTP verification." type="tel" placeholder="+1 (555) 000-0000" isOpen={phoneModalOpen} onClose={() => setPhoneModalOpen(false)} />
+      <footer className="relative z-10 border-t border-brandBorder px-6 py-14">
+        <div className="max-w-7xl mx-auto flex flex-col gap-12 lg:flex-row lg:items-start lg:justify-between">
+          <Reveal className="max-w-sm">
+            <a href="#" className="inline-flex items-center gap-3 rounded-full focus:outline-none focus:ring-2 focus:ring-brandGreen/40" aria-label="QuickStart.Ai Homepage">
+              <div className="relative flex h-10 w-10 items-center justify-center overflow-hidden">
+                <Q3DCanvas scale={0.8} className="absolute h-10 w-10 pointer-events-none" />
+              </div>
+              <span className="text-xl font-bold tracking-tight text-white">
+                QuickStart<span className="text-brandGreen">.Ai</span>
+              </span>
+            </a>
+            <p className="mt-5 text-sm leading-relaxed text-brandTextSec">
+              Build Full-Stack <span className="text-brandGreen">Web &amp; Mobile Apps in Minutes</span> with one cohesive platform for product generation, infrastructure, and launch-ready workflows.
+            </p>
+          </Reveal>
+
+          <div className="grid gap-10 sm:grid-cols-2 lg:grid-cols-4">
+            {FOOTER_LINK_COLUMNS.map((column) => (
+              <Reveal key={column.title}>
+                <div>
+                  <h3 className="text-sm font-semibold uppercase tracking-[0.22em] text-white/80">{column.title}</h3>
+                  <ul className="mt-4 space-y-3">
+                    {column.links.map((link) => (
+                      <li key={link.label}>
+                        <a href={link.href} className="text-sm text-brandTextSec transition-colors duration-200 hover:text-brandGreen">
+                          {link.label}
+                        </a>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              </Reveal>
+            ))}
+
+            <Reveal>
+              <div>
+                <h3 className="text-sm font-semibold uppercase tracking-[0.22em] text-white/80">Social</h3>
+                <div className="mt-4 flex flex-wrap gap-3">
+                  {[
+                    { label: "GitHub", icon: Github },
+                    { label: "X", icon: X },
+                    { label: "Twitter", icon: Twitter },
+                    { label: "Slack", icon: Slack },
+                  ].map((social) => {
+                    const Icon = social.icon;
+
+                    return (
+                      <a
+                        key={social.label}
+                        href="#"
+                        aria-label={social.label}
+                        className="inline-flex h-11 w-11 items-center justify-center rounded-full border border-brandBorder bg-brandSurface text-white/70 transition-all duration-300 hover:border-brandGreen/40 hover:text-brandGreen"
+                      >
+                        <Icon className="h-4 w-4" />
+                      </a>
+                    );
+                  })}
+                </div>
+              </div>
+            </Reveal>
+          </div>
+        </div>
+      </footer>
+
+      <LoginModal
+        isOpen={authModalOpen}
+        onClose={closeAuthModal}
+        onProviderAuth={handleProviderAuth}
+        onEmailSignUp={handleEmailSignUp}
+        onEmailSignIn={handleEmailSignIn}
+        onPhoneContinue={handlePhoneContinue}
+        initialStep={authModalInitialStep}
+      />
 
       <style>{`
         .noise-bg { position: fixed; top: -50%; left: -50%; right: -50%; bottom: -50%; width: 200%; height: 200%; opacity: 0.8; pointer-events: none; z-index: 999; animation: noise-anim 0.2s infinite; }

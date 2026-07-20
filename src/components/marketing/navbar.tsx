@@ -8,7 +8,7 @@ export function Navbar() {
       </Link>
       <nav className="flex items-center gap-4 text-sm text-slate-300">
         <Link href="/pricing">Pricing</Link>
-        <Link href="/login">Login</Link>
+        <Link href="/">Login</Link>
         <Link className="rounded-full bg-sky-400 px-4 py-2 font-medium text-slate-950" href="/register">
           Start building
         </Link>
