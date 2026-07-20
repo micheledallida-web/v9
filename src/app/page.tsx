@@ -1,8 +1,11 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { useRouter } from "next/navigation";
+import type { Provider } from "@supabase/supabase-js";
 import LoginModal, { FacebookIcon, GoogleIcon, PROVIDER_ICON_CLASS, ProviderButton } from "./LoginModal";
 import Q3DCanvas from "./Q3DCanvas";
+import { createSupabaseBrowserClient, isSupabaseConfigured } from "@/lib/supabase";
 import {
   Zap,
   Layout,
@@ -242,13 +245,28 @@ const FOOTER_LINK_COLUMNS = [
   },
 ] as const;
 
-const AUTH_SIMULATION_DELAY_MS = 1800;
-
 export default function LandingPage() {
+  const router = useRouter();
   const [authModalOpen, setAuthModalOpen] = useState(false);
   const [authModalInitialStep, setAuthModalInitialStep] = useState<"options" | "email" | "phone" | "signin">("options");
   const [showGetStartedButton, setShowGetStartedButton] = useState(false);
   const heroAuthButtonsRowRef = useRef<HTMLDivElement | null>(null);
+
+  // Redirect already-authenticated users straight to the dashboard.
+  useEffect(() => {
+    if (!isSupabaseConfigured) return;
+    const supabase = createSupabaseBrowserClient();
+
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      if (session) router.replace("/dashboard");
+    });
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      if (session) router.replace("/dashboard");
+    });
+
+    return () => subscription.unsubscribe();
+  }, [router]);
 
   useEffect(() => {
     const heroAuthButtonsRow = heroAuthButtonsRowRef.current;
@@ -277,24 +295,67 @@ export default function LandingPage() {
     setAuthModalOpen(false);
   }
 
+  /** Returns a configured Supabase client, or null with an alert if env vars are missing. */
+  function getSupabaseOrWarn() {
+    if (!isSupabaseConfigured) {
+      alert("Authentication is currently unavailable. Please try again later or contact support.");
+      return null;
+    }
+    return createSupabaseBrowserClient();
+  }
+
   async function handleProviderAuth(provider: string) {
-    await new Promise((resolve) => setTimeout(resolve, AUTH_SIMULATION_DELAY_MS));
-    alert(`Authorization request with ${provider} completed. (placeholder — wire up Supabase OAuth here)`);
+    const supabase = getSupabaseOrWarn();
+    if (!supabase) return;
+    await supabase.auth.signInWithOAuth({
+      provider: provider.toLowerCase() as Provider,
+      options: { redirectTo: `${window.location.origin}/dashboard` },
+    });
   }
 
   async function handleEmailSignUp(payload: { name: string; email: string; password: string }) {
-    await new Promise((resolve) => setTimeout(resolve, AUTH_SIMULATION_DELAY_MS));
-    alert(`Sign-up for ${payload.name} (${payload.email}) — placeholder. Wire up Supabase signUp here.`);
+    const supabase = getSupabaseOrWarn();
+    if (!supabase) return;
+    const { error } = await supabase.auth.signUp({
+      email: payload.email,
+      password: payload.password,
+      options: { data: { full_name: payload.name } },
+    });
+    if (error) {
+      alert(error.message);
+    } else {
+      router.push("/dashboard");
+    }
   }
 
   async function handleEmailSignIn(payload: { email: string; password: string }) {
-    await new Promise((resolve) => setTimeout(resolve, AUTH_SIMULATION_DELAY_MS));
-    alert(`Sign-in for ${payload.email} — placeholder. Wire up Supabase signInWithPassword here.`);
+    const supabase = getSupabaseOrWarn();
+    if (!supabase) return;
+    const { error } = await supabase.auth.signInWithPassword({
+      email: payload.email,
+      password: payload.password,
+    });
+    if (error) {
+      alert(error.message);
+    } else {
+      router.push("/dashboard");
+    }
   }
 
   async function handlePhoneContinue(payload: { name: string; dialCode: string; phone: string }) {
-    await new Promise((resolve) => setTimeout(resolve, AUTH_SIMULATION_DELAY_MS));
-    alert(`Get code for ${payload.name || "user"} (${payload.dialCode || ""} ${payload.phone || "no phone"})`);
+    const supabase = getSupabaseOrWarn();
+    if (!supabase) return;
+    const dialCode = payload.dialCode.trim();
+    const localNumber = payload.phone.replace(/\D/g, "");
+    if (!dialCode || !localNumber) {
+      alert("Please enter a valid dial code and phone number.");
+      return;
+    }
+    const phone = `${dialCode}${localNumber}`;
+    const { error } = await supabase.auth.signInWithOtp({ phone });
+    if (error) {
+      alert(error.message);
+    }
   }
 
   return (

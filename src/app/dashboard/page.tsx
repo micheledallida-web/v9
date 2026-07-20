@@ -1,5 +1,6 @@
 import { CreateModal } from '@/components/dashboard/create-modal';
 import { ProjectCard } from '@/components/dashboard/project-card';
+import { createSupabaseServerClient } from '@/lib/supabase-server';
 
 type ProjectSummary = {
   id: string;
@@ -9,12 +10,28 @@ type ProjectSummary = {
 };
 
 async function getProjects(): Promise<ProjectSummary[]> {
-  // TODO: replace with a Supabase server-side query or cached data loader.
-  return [
-    { id: 'alpha', name: 'Alpha Landing', updatedAt: '2 hours ago', status: 'Draft' },
-    { id: 'beta', name: 'Beta Commerce', updatedAt: 'Yesterday', status: 'Deploying' },
-    { id: 'gamma', name: 'Gamma Portal', updatedAt: '3 days ago', status: 'Live' },
-  ];
+  const supabase = await createSupabaseServerClient();
+  if (!supabase) return [];
+
+  const { data, error } = await supabase
+    .from('projects')
+    .select('id, name, updated_at, status')
+    .order('updated_at', { ascending: false });
+
+  if (error || !data) {
+    return [];
+  }
+
+  return data.map((row) => ({
+    id: String(row.id),
+    name: String(row.name),
+    updatedAt: new Date(row.updated_at as string).toLocaleDateString(undefined, {
+      month: 'short',
+      day: 'numeric',
+      year: 'numeric',
+    }),
+    status: String(row.status ?? 'Draft'),
+  }));
 }
 
 export default async function DashboardPage() {
@@ -26,7 +43,11 @@ export default async function DashboardPage() {
         <div className="space-y-2">
           <p className="text-sm uppercase tracking-[0.3em] text-sky-300">Dashboard</p>
           <h1 className="text-3xl font-semibold text-white">Project control room</h1>
-          <p className="text-slate-300">TODO: hydrate this grid from Supabase projects scoped to the authenticated workspace.</p>
+          <p className="text-slate-300">
+            {projects.length === 0
+              ? 'No projects yet — create your first one below.'
+              : `${projects.length} project${projects.length === 1 ? '' : 's'} in your workspace.`}
+          </p>
         </div>
         <CreateModal />
       </header>
