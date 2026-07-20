@@ -298,7 +298,7 @@ export default function LandingPage() {
   /** Returns a configured Supabase client, or null with an alert if env vars are missing. */
   function getSupabaseOrWarn() {
     if (!isSupabaseConfigured) {
-      alert("Supabase is not configured. Add NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_ANON_KEY to your environment.");
+      alert("Authentication is currently unavailable. Please try again later or contact support.");
       return null;
     }
     return createSupabaseBrowserClient();
