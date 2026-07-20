@@ -24,7 +24,7 @@ type CountryOption = {
   dialCode: string;
 };
 
-function GoogleIcon({ className = "" }: { className?: string }) {
+export function GoogleIcon({ className = "" }: { className?: string }) {
   return (
     <svg viewBox="0 0 24 24" aria-hidden="true" className={className}>
       <path
@@ -47,7 +47,7 @@ function GoogleIcon({ className = "" }: { className?: string }) {
   );
 }
 
-function FacebookIcon({ className = "" }: { className?: string }) {
+export function FacebookIcon({ className = "" }: { className?: string }) {
   return (
     <svg viewBox="0 0 24 24" aria-hidden="true" className={className}>
       <circle cx="12" cy="12" r="10" fill="#1877F2" />
@@ -63,16 +63,20 @@ function generateFlagEmoji(countryCode: string) {
   return String.fromCodePoint(...countryCode.toUpperCase().split("").map((char) => 127397 + char.charCodeAt(0)));
 }
 
-function ProviderButton({
+export const PROVIDER_ICON_CLASS = "h-5 w-5 shrink-0";
+
+export function ProviderButton({
   provider,
   className,
   children,
   onProviderAuth,
+  loadingLabel = "Pending…",
 }: {
   provider: string;
   className: string;
   children: React.ReactNode;
   onProviderAuth: (provider: string) => Promise<void> | void;
+  loadingLabel?: React.ReactNode;
 }) {
   const [loading, setLoading] = useState(false);
 
@@ -90,7 +94,7 @@ function ProviderButton({
       {loading ? (
         <>
           <span className="btn-spinner mr-2" />
-          Pending…
+          {loadingLabel}
         </>
       ) : (
         children
@@ -200,7 +204,7 @@ export default function LoginModal({ isOpen, onClose, onProviderAuth, onEmailSig
     </p>
   );
 
-  const providerIconClass = "h-5 w-5 shrink-0";
+  const providerIconClass = PROVIDER_ICON_CLASS;
   const compactProviderButtonClass =
     "h-10 rounded-full border border-white/15 bg-brandSurfaceAccent px-3 text-sm font-medium flex items-center justify-center gap-2 hover:border-white/30 transition disabled:opacity-60";
 

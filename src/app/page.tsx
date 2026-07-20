@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import LoginModal from "./LoginModal";
+import LoginModal, { FacebookIcon, GoogleIcon, PROVIDER_ICON_CLASS, ProviderButton } from "./LoginModal";
 import Q3DCanvas from "./Q3DCanvas";
 import {
   Zap,
@@ -13,7 +13,10 @@ import {
   Check,
   ChevronDown,
   X,
-  Github,
+  Apple,
+  Github as GitHubIcon,
+  Mail,
+  Phone,
   Twitter,
   Slack,
 } from "lucide-react";
@@ -241,35 +244,6 @@ const FOOTER_LINK_COLUMNS = [
 
 const AUTH_SIMULATION_DELAY_MS = 1800;
 
-function AuthButton({
-  provider,
-  className,
-  children,
-  onAuth,
-}: {
-  provider: string;
-  className: string;
-  children: React.ReactNode;
-  onAuth: (provider: string) => Promise<void> | void;
-}) {
-  const [loading, setLoading] = useState(false);
-
-  async function handleClick() {
-    setLoading(true);
-    try {
-      await onAuth(provider);
-    } finally {
-      setLoading(false);
-    }
-  }
-
-  return (
-    <button onClick={handleClick} disabled={loading} className={className}>
-      {loading ? <><span className="btn-spinner mr-2" /> Authorization Pending...</> : children}
-    </button>
-  );
-}
-
 export default function LandingPage() {
   const [authModalOpen, setAuthModalOpen] = useState(false);
   const [authModalInitialStep, setAuthModalInitialStep] = useState<"options" | "email" | "phone" | "signin">("options");
@@ -360,17 +334,18 @@ export default function LandingPage() {
             <p className="mt-6 text-lg md:text-xl text-brandTextSec max-w-2xl mx-auto leading-relaxed">Instantly generate native mobile applications, progressive web apps, production APIs, schema-perfect databases, authentication architectures, AI agents, secure cloud storage, and fully automated deployment configurations using simple natural language.</p>
           </div>
           <div id="signup" className="w-full max-w-md mx-auto mt-12 z-20 reveal-element active space-y-6">
-            <AuthButton onAuth={handleProviderAuth} provider="Google" className="w-full inline-flex items-center justify-center gap-3 bg-white text-black py-4 px-6 rounded-pill text-base font-semibold transition-all duration-300 hover:bg-brandGreen hover:scale-[1.01] focus:outline-none focus:ring-2 focus:ring-brandGreen/40 shadow-lg group">
+            <ProviderButton loadingLabel="Authorization Pending..." onProviderAuth={handleProviderAuth} provider="Google" className="w-full inline-flex items-center justify-center gap-2 bg-white text-black py-4 px-6 rounded-pill text-base font-semibold transition-all duration-300 hover:bg-brandGreen hover:scale-[1.01] focus:outline-none focus:ring-2 focus:ring-brandGreen/40 shadow-lg group">
+              <GoogleIcon className={PROVIDER_ICON_CLASS} />
               <span>Continue with Google</span>
-            </AuthButton>
+            </ProviderButton>
             <div className="grid grid-cols-3 gap-3">
-              <AuthButton onAuth={handleProviderAuth} provider="GitHub" className="inline-flex items-center justify-center gap-2 py-3.5 px-3 bg-brandSurface hover:bg-brandSurfaceAccent border border-brandBorder rounded-pill text-sm font-medium transition-all duration-300 hover:scale-[1.02] focus:outline-none focus:ring-1 focus:ring-white/20"><Github className="w-4 h-4 text-brandGreen shrink-0" /><span>GitHub</span></AuthButton>
-              <AuthButton onAuth={handleProviderAuth} provider="Apple" className="inline-flex items-center justify-center gap-2 py-3.5 px-3 bg-brandSurface hover:bg-brandSurfaceAccent border border-brandBorder rounded-pill text-sm font-medium transition-all duration-300 hover:scale-[1.02] focus:outline-none focus:ring-1 focus:ring-white/20"><span>Apple</span></AuthButton>
-              <AuthButton onAuth={handleProviderAuth} provider="Facebook" className="inline-flex items-center justify-center gap-2 py-3.5 px-3 bg-brandSurface hover:bg-brandSurfaceAccent border border-brandBorder rounded-pill text-sm font-medium transition-all duration-300 hover:scale-[1.02] focus:outline-none focus:ring-1 focus:ring-white/20"><span>Facebook</span></AuthButton>
+              <ProviderButton loadingLabel="Authorization Pending..." onProviderAuth={handleProviderAuth} provider="GitHub" className="inline-flex items-center justify-center gap-2 py-3.5 px-3 bg-brandSurface hover:bg-brandSurfaceAccent border border-brandBorder rounded-pill text-sm font-medium transition-all duration-300 hover:scale-[1.02] focus:outline-none focus:ring-1 focus:ring-white/20"><GitHubIcon className={`${PROVIDER_ICON_CLASS} text-brandGreen`} /><span>GitHub</span></ProviderButton>
+              <ProviderButton loadingLabel="Authorization Pending..." onProviderAuth={handleProviderAuth} provider="Apple" className="inline-flex items-center justify-center gap-2 py-3.5 px-3 bg-brandSurface hover:bg-brandSurfaceAccent border border-brandBorder rounded-pill text-sm font-medium transition-all duration-300 hover:scale-[1.02] focus:outline-none focus:ring-1 focus:ring-white/20"><Apple className={`${PROVIDER_ICON_CLASS} text-white`} /><span>Apple</span></ProviderButton>
+              <ProviderButton loadingLabel="Authorization Pending..." onProviderAuth={handleProviderAuth} provider="Facebook" className="inline-flex items-center justify-center gap-2 py-3.5 px-3 bg-brandSurface hover:bg-brandSurfaceAccent border border-brandBorder rounded-pill text-sm font-medium transition-all duration-300 hover:scale-[1.02] focus:outline-none focus:ring-1 focus:ring-white/20"><FacebookIcon className={PROVIDER_ICON_CLASS} /><span>Facebook</span></ProviderButton>
             </div>
             <div ref={heroAuthButtonsRowRef} className="grid grid-cols-2 gap-4">
-              <button onClick={() => openAuthModal("email")} className="inline-flex items-center justify-center py-4 px-5 bg-brandSurface hover:bg-brandSurfaceAccent border border-brandBorder rounded-pill text-sm font-semibold transition-all duration-300 hover:scale-[1.01] hover:border-brandGreen/40 focus:outline-none focus:ring-1 focus:ring-brandGreen/40">Continue with Email</button>
-              <button onClick={() => openAuthModal("phone")} className="inline-flex items-center justify-center py-4 px-5 bg-brandSurface hover:bg-brandSurfaceAccent border border-brandBorder rounded-pill text-sm font-semibold transition-all duration-300 hover:scale-[1.01] hover:border-brandGreen/40 focus:outline-none focus:ring-1 focus:ring-brandGreen/40">Continue with Phone</button>
+              <button onClick={() => openAuthModal("email")} className="inline-flex items-center justify-center gap-2 py-4 px-5 bg-brandSurface hover:bg-brandSurfaceAccent border border-brandBorder rounded-pill text-sm font-semibold transition-all duration-300 hover:scale-[1.01] hover:border-brandGreen/40 focus:outline-none focus:ring-1 focus:ring-brandGreen/40"><Mail className={`${PROVIDER_ICON_CLASS} text-white/80`} />Continue with Email</button>
+              <button onClick={() => openAuthModal("phone")} className="inline-flex items-center justify-center gap-2 py-4 px-5 bg-brandSurface hover:bg-brandSurfaceAccent border border-brandBorder rounded-pill text-sm font-semibold transition-all duration-300 hover:scale-[1.01] hover:border-brandGreen/40 focus:outline-none focus:ring-1 focus:ring-brandGreen/40"><Phone className={`${PROVIDER_ICON_CLASS} text-white/80`} />Continue with Phone</button>
             </div>
           </div>
         </section>
@@ -544,7 +519,7 @@ export default function LandingPage() {
                 <h3 className="text-sm font-semibold uppercase tracking-[0.22em] text-white/80">Social</h3>
                 <div className="mt-4 flex flex-wrap gap-3">
                   {[
-                    { label: "GitHub", icon: Github },
+                    { label: "GitHub", icon: GitHubIcon },
                     { label: "X", icon: X },
                     { label: "Twitter", icon: Twitter },
                     { label: "Slack", icon: Slack },
