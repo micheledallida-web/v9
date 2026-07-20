@@ -178,6 +178,7 @@ const PRICING_TIERS = [
     price: "$0",
     ctaLabel: "Get Started",
     icon: Zap,
+    highlight: false,
     features: [
       "Core product building workflows",
       "Foundational generation and preview tools",
@@ -203,6 +204,7 @@ const PRICING_TIERS = [
     price: "$150",
     ctaLabel: "Get Started",
     icon: Cpu,
+    highlight: false,
     features: [
       "Everything in Pro, plus:",
       "Advanced platform access for larger delivery needs",
