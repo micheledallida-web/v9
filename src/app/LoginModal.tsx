@@ -217,9 +217,13 @@ export default function LoginModal({ isOpen, onClose, onProviderAuth, onEmailSig
                       onProviderAuth={onProviderAuth}
                       className={iconOnlyProviderButtonClass}
                     >
-                      <span className="flex h-5 w-5 items-center justify-center rounded-full bg-[#1877F2] text-white text-[12px] font-bold leading-none">
-                        f
-                      </span>
+                      <svg viewBox="0 0 24 24" aria-hidden="true" className="h-5 w-5 shrink-0">
+                        <circle cx="12" cy="12" r="10" fill="#1877F2" />
+                        <path
+                          d="M13.35 18v-5.47h1.84l.28-2.13h-2.12V9.04c0-.62.17-1.04 1.05-1.04h1.12V6.09c-.19-.03-.86-.09-1.63-.09-1.61 0-2.72.98-2.72 2.79v1.61H9.35v2.13h1.82V18h2.18Z"
+                          fill="#FFFFFF"
+                        />
+                      </svg>
                     </ProviderButton>
                   </div>
 
