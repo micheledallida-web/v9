@@ -274,14 +274,14 @@ export default function LandingPage() {
   const [authModalOpen, setAuthModalOpen] = useState(false);
   const [authModalInitialStep, setAuthModalInitialStep] = useState<"options" | "email" | "phone" | "signin">("options");
   const [showGetStartedButton, setShowGetStartedButton] = useState(false);
-  const heroAuthSectionRef = useRef<HTMLDivElement | null>(null);
+  const heroAuthButtonsRowRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
-    const heroAuthSection = heroAuthSectionRef.current;
-    if (!heroAuthSection) return;
+    const heroAuthButtonsRow = heroAuthButtonsRowRef.current;
+    if (!heroAuthButtonsRow) return;
 
     const updateGetStartedVisibility = () => {
-      setShowGetStartedButton(heroAuthSection.getBoundingClientRect().bottom <= 0);
+      setShowGetStartedButton(heroAuthButtonsRow.getBoundingClientRect().bottom <= 0);
     };
 
     updateGetStartedVisibility();
@@ -359,7 +359,7 @@ export default function LandingPage() {
             <h1 className="text-4xl sm:text-6xl md:text-7xl font-bold tracking-tighter leading-[1.05] text-white">Build Full-Stack<br /><span className="text-brandGreen">Web & Mobile Apps in Minutes</span></h1>
             <p className="mt-6 text-lg md:text-xl text-brandTextSec max-w-2xl mx-auto leading-relaxed">Instantly generate native mobile applications, progressive web apps, production APIs, schema-perfect databases, authentication architectures, AI agents, secure cloud storage, and fully automated deployment configurations using simple natural language.</p>
           </div>
-          <div ref={heroAuthSectionRef} id="signup" className="w-full max-w-md mx-auto mt-12 z-20 reveal-element active space-y-6">
+          <div id="signup" className="w-full max-w-md mx-auto mt-12 z-20 reveal-element active space-y-6">
             <AuthButton onAuth={handleProviderAuth} provider="Google" className="w-full inline-flex items-center justify-center gap-3 bg-white text-black py-4 px-6 rounded-pill text-base font-semibold transition-all duration-300 hover:bg-brandGreen hover:scale-[1.01] focus:outline-none focus:ring-2 focus:ring-brandGreen/40 shadow-lg group">
               <span>Continue with Google</span>
             </AuthButton>
@@ -368,7 +368,7 @@ export default function LandingPage() {
               <AuthButton onAuth={handleProviderAuth} provider="Apple" className="inline-flex items-center justify-center gap-2 py-3.5 px-3 bg-brandSurface hover:bg-brandSurfaceAccent border border-brandBorder rounded-pill text-sm font-medium transition-all duration-300 hover:scale-[1.02] focus:outline-none focus:ring-1 focus:ring-white/20"><span>Apple</span></AuthButton>
               <AuthButton onAuth={handleProviderAuth} provider="Facebook" className="inline-flex items-center justify-center gap-2 py-3.5 px-3 bg-brandSurface hover:bg-brandSurfaceAccent border border-brandBorder rounded-pill text-sm font-medium transition-all duration-300 hover:scale-[1.02] focus:outline-none focus:ring-1 focus:ring-white/20"><span>Facebook</span></AuthButton>
             </div>
-            <div className="grid grid-cols-2 gap-4">
+            <div ref={heroAuthButtonsRowRef} className="grid grid-cols-2 gap-4">
               <button onClick={() => openAuthModal("email")} className="inline-flex items-center justify-center py-4 px-5 bg-brandSurface hover:bg-brandSurfaceAccent border border-brandBorder rounded-pill text-sm font-semibold transition-all duration-300 hover:scale-[1.01] hover:border-brandGreen/40 focus:outline-none focus:ring-1 focus:ring-brandGreen/40">Continue with Email</button>
               <button onClick={() => openAuthModal("phone")} className="inline-flex items-center justify-center py-4 px-5 bg-brandSurface hover:bg-brandSurfaceAccent border border-brandBorder rounded-pill text-sm font-semibold transition-all duration-300 hover:scale-[1.01] hover:border-brandGreen/40 focus:outline-none focus:ring-1 focus:ring-brandGreen/40">Continue with Phone</button>
             </div>
