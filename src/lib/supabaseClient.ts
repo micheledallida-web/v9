@@ -31,14 +31,14 @@ function createSharedSupabaseClient(): SupabaseClient | null {
     });
 }
 
-const supabase: SupabaseClient | null = createSharedSupabaseClient();
+const sharedSupabaseClient: SupabaseClient | null = createSharedSupabaseClient();
 
 export function requireSupabaseClient(): SupabaseClient {
-  if (!supabase) {
+  if (!sharedSupabaseClient) {
     throw new Error('Missing NEXT_PUBLIC_SUPABASE_URL or NEXT_PUBLIC_SUPABASE_ANON_KEY.');
   }
 
-  return supabase;
+  return sharedSupabaseClient;
 }
 
 // Robust local storage fallback key definitions
@@ -49,8 +49,8 @@ const LOCAL_STORAGE_KEY_STATIONS = 'cosmobuilder_stations';
 export const dbHelper = {
   async saveStarSystem(system: StarSystem): Promise<boolean> {
     try {
-      if (supabase) {
-        const { error } = await supabase.from('star_systems').upsert(system);
+      if (sharedSupabaseClient) {
+        const { error } = await sharedSupabaseClient.from('star_systems').upsert(system);
         if (!error) return true;
       }
       
@@ -152,8 +152,8 @@ export const dbHelper = {
 
   async saveSpaceStation(station: SpaceStationAssembly): Promise<boolean> {
     try {
-      if (supabase) {
-        const { error } = await supabase.from('space_stations').upsert(station);
+      if (sharedSupabaseClient) {
+        const { error } = await sharedSupabaseClient.from('space_stations').upsert(station);
         if (!error) return true;
       }
       if (typeof window !== 'undefined') {
