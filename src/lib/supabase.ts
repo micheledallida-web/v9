@@ -1,12 +1,10 @@
-import { supabase } from './supabaseClient';
+import type { SupabaseClient } from '@supabase/supabase-js';
 
-export function createSupabaseBrowserClient() {
-  if (!supabase) {
-    throw new Error('Missing NEXT_PUBLIC_SUPABASE_URL or NEXT_PUBLIC_SUPABASE_ANON_KEY.');
-  }
+import { requireSupabaseClient } from './supabaseClient';
 
-  return supabase;
+export function createSupabaseBrowserClient(): SupabaseClient {
+  return requireSupabaseClient();
 }
 
 export const createClientBrowser = createSupabaseBrowserClient;
-export { isSupabaseConfigured, supabase } from './supabaseClient';
+export { isSupabaseConfigured, requireSupabaseClient, supabase } from './supabaseClient';

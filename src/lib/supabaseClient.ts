@@ -31,7 +31,19 @@ function createSharedSupabaseClient(): SupabaseClient | null {
     });
 }
 
+/**
+ * Shared browser Supabase client instance.
+ * Check `isSupabaseConfigured` or call `requireSupabaseClient()` before using it in code paths that require live credentials.
+ */
 export const supabase: SupabaseClient | null = createSharedSupabaseClient();
+
+export function requireSupabaseClient(): SupabaseClient {
+  if (!supabase) {
+    throw new Error('Missing NEXT_PUBLIC_SUPABASE_URL or NEXT_PUBLIC_SUPABASE_ANON_KEY.');
+  }
+
+  return supabase;
+}
 
 // Robust local storage fallback key definitions
 const LOCAL_STORAGE_KEY_SYSTEMS = 'cosmobuilder_star_systems';
