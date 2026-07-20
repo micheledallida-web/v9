@@ -257,22 +257,6 @@ export default function LoginModal({ isOpen, onClose, onProviderAuth, onEmailSig
 
             {authStep === "email" && (
               <div>
-                <p className="mb-3 text-center text-sm sm:text-base font-medium text-white/85">
-                  Already have an account?{" "}
-                  <button
-                    type="button"
-                    onClick={() => setAuthStep("signin")}
-                    className="underline underline-offset-4 hover:text-brandGreen transition-colors"
-                  >
-                    Sign in
-                  </button>
-                </p>
-
-                <div className="mb-4 flex flex-col items-center text-center">
-                  {spinningQ}
-                  {heading}
-                </div>
-
                 <form
                   onSubmit={async (e) => {
                     e.preventDefault();
@@ -322,23 +306,13 @@ export default function LoginModal({ isOpen, onClose, onProviderAuth, onEmailSig
 
                   <div className="pt-1 flex items-center gap-3">
                     <button
-                      type="button"
-                      onClick={() => setAuthStep("options")}
-                      className="h-11 w-11 shrink-0 rounded-full bg-brandSurfaceAccent border border-white/10 text-white flex items-center justify-center"
-                      aria-label="Go back"
-                    >
-                      <ArrowLeft className="h-5 w-5" />
-                    </button>
-                    <button
                       type="submit"
-                      className="h-11 flex-1 rounded-full bg-white text-[#151515] text-sm sm:text-base font-semibold tracking-tight flex items-center justify-center gap-2"
+                      className="h-11 w-full rounded-full bg-white text-[#151515] text-sm sm:text-base font-semibold tracking-tight flex items-center justify-center gap-2"
                     >
                       Get Started <ArrowRight className="h-4 w-4" />
                     </button>
                   </div>
                 </form>
-
-                {footerLinks}
               </div>
             )}
 

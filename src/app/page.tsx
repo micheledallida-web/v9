@@ -205,6 +205,26 @@ function AuthButton({
 export default function LandingPage() {
   const [authModalOpen, setAuthModalOpen] = useState(false);
   const [authModalInitialStep, setAuthModalInitialStep] = useState<"options" | "email" | "phone" | "signin">("options");
+  const [showGetStartedButton, setShowGetStartedButton] = useState(false);
+  const heroAuthSectionRef = useRef<HTMLDivElement | null>(null);
+
+  useEffect(() => {
+    const heroAuthSection = heroAuthSectionRef.current;
+    if (!heroAuthSection) return;
+
+    const updateGetStartedVisibility = () => {
+      setShowGetStartedButton(heroAuthSection.getBoundingClientRect().bottom <= 0);
+    };
+
+    updateGetStartedVisibility();
+    window.addEventListener("scroll", updateGetStartedVisibility, { passive: true });
+    window.addEventListener("resize", updateGetStartedVisibility);
+
+    return () => {
+      window.removeEventListener("scroll", updateGetStartedVisibility);
+      window.removeEventListener("resize", updateGetStartedVisibility);
+    };
+  }, []);
 
   function openAuthModal(step: "options" | "email" | "phone" | "signin" = "options") {
     setAuthModalInitialStep(step);
@@ -256,7 +276,9 @@ export default function LandingPage() {
             <a href="#pricing" className="hover:text-white transition-colors duration-200">Pricing</a>
             <a href="#faq" className="hover:text-white transition-colors duration-200">FAQ</a>
           </nav>
-          <button onClick={() => openAuthModal()} className="inline-flex items-center justify-center bg-white text-black px-6 py-2.5 rounded-pill text-sm font-semibold hover:bg-brandGreen transition-all duration-300 hover:scale-[1.02] focus:outline-none focus:ring-2 focus:ring-brandGreen/40 shadow-sm">Get Started</button>
+          {showGetStartedButton && (
+            <button onClick={() => openAuthModal()} className="inline-flex items-center justify-center bg-white text-black px-6 py-2.5 rounded-pill text-sm font-semibold hover:bg-brandGreen transition-all duration-300 hover:scale-[1.02] focus:outline-none focus:ring-2 focus:ring-brandGreen/40 shadow-sm">Get Started</button>
+          )}
         </div>
       </header>
 
@@ -269,7 +291,7 @@ export default function LandingPage() {
             <h1 className="text-4xl sm:text-6xl md:text-7xl font-bold tracking-tighter leading-[1.05] text-white">Build Full-Stack<br /><span className="text-brandGreen">Web & Mobile Apps in Minutes</span></h1>
             <p className="mt-6 text-lg md:text-xl text-brandTextSec max-w-2xl mx-auto leading-relaxed">Instantly generate native mobile applications, progressive web apps, production APIs, schema-perfect databases, authentication architectures, AI agents, secure cloud storage, and fully automated deployment configurations using simple natural language.</p>
           </div>
-          <div id="signup" className="w-full max-w-md mx-auto mt-12 z-20 reveal-element active space-y-6">
+          <div ref={heroAuthSectionRef} id="signup" className="w-full max-w-md mx-auto mt-12 z-20 reveal-element active space-y-6">
             <AuthButton onAuth={handleProviderAuth} provider="Google" className="w-full inline-flex items-center justify-center gap-3 bg-white text-black py-4 px-6 rounded-pill text-base font-semibold transition-all duration-300 hover:bg-brandGreen hover:scale-[1.01] focus:outline-none focus:ring-2 focus:ring-brandGreen/40 shadow-lg group">
               <span>Continue with Google</span>
             </AuthButton>
