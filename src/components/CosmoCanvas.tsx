@@ -2,7 +2,7 @@
 
 import React, { useRef, useEffect } from 'react';
 import * as THREE from 'three';
-import { PlanetConfig, StationModule } from '../lib/supabaseClient';
+import type { PlanetConfig, StationModule } from '../lib/supabase-types';
 
 interface CosmoCanvasProps {
   planets: PlanetConfig[];

@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react';
 import { Plus, Trash2, Shield, BatteryCharging, Power, RotateCw, Sparkles, Milestone } from 'lucide-react';
-import { StationModule } from '../lib/supabaseClient';
+import type { StationModule } from '../lib/supabase-types';
 
 interface StationBuilderProps {
   modules: StationModule[];

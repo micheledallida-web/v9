@@ -1,64 +1,41 @@
-import { createClient } from '@supabase/supabase-js';
+import { createClient, type SupabaseClient } from '@supabase/supabase-js';
 
-// Provide a fully type-safe mock layer or live database connection based on environment variables
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://mock-space-database.supabase.co';
-const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || 'mock-anon-key-1029384756-space-builder';
+import type {
+  PlanetConfig,
+  SpaceStationAssembly,
+  StarSystem,
+} from './supabase-types';
 
-export const supabase = createClient(supabaseUrl, supabaseAnonKey);
+export type {
+  PlanetConfig,
+  SpaceStationAssembly,
+  StarSystem,
+  StationModule,
+} from './supabase-types';
+
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+
+export const isSupabaseConfigured = Boolean(supabaseUrl && supabaseAnonKey);
+
+export const supabase: SupabaseClient | null = isSupabaseConfigured
+  ? createClient(supabaseUrl!, supabaseAnonKey!, {
+      auth: {
+        persistSession: true,
+        autoRefreshToken: true,
+      },
+    })
+  : null;
 
 // Robust local storage fallback key definitions
 const LOCAL_STORAGE_KEY_SYSTEMS = 'cosmobuilder_star_systems';
 const LOCAL_STORAGE_KEY_STATIONS = 'cosmobuilder_stations';
 
-export interface PlanetConfig {
-  id: string;
-  name: string;
-  type: 'earth' | 'gas_giant' | 'lava' | 'ice' | 'exotic';
-  color: string;
-  size: number;
-  distance: number;
-  speed: number;
-  hasRings: boolean;
-  ringsColor?: string;
-  rotationSpeed: number;
-  moonsCount: number;
-  mass: number; // in Earth masses
-  atmosphere: string;
-}
-
-export interface StationModule {
-  id: string;
-  type: 'core' | 'solar' | 'habitat' | 'docking' | 'thruster';
-  x: number;
-  y: number;
-  z: number;
-  rotation: number;
-}
-
-export interface StarSystem {
-  id: string;
-  name: string;
-  starType: 'yellow_dwarf' | 'blue_giant' | 'red_dwarf' | 'neutron';
-  starColor: string;
-  starSize: number;
-  gravityFactor: number;
-  planets: PlanetConfig[];
-  createdAt: string;
-}
-
-export interface SpaceStationAssembly {
-  id: string;
-  name: string;
-  modules: StationModule[];
-  createdAt: string;
-}
-
-// Local storage system helper implementations to guarantee functionality even without external Supabase keys configured!
+// Local storage helper implementations keep the imported components usable until real Supabase values are added.
 export const dbHelper = {
   async saveStarSystem(system: StarSystem): Promise<boolean> {
     try {
-      // Try saving to Supabase if configured & dynamic keys are custom, otherwise fallback gracefully
-      if (process.env.NEXT_PUBLIC_SUPABASE_URL && process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY) {
+      if (supabase) {
         const { error } = await supabase.from('star_systems').upsert(system);
         if (!error) return true;
       }
@@ -161,7 +138,7 @@ export const dbHelper = {
 
   async saveSpaceStation(station: SpaceStationAssembly): Promise<boolean> {
     try {
-      if (process.env.NEXT_PUBLIC_SUPABASE_URL && process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY) {
+      if (supabase) {
         const { error } = await supabase.from('space_stations').upsert(station);
         if (!error) return true;
       }
