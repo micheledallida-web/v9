@@ -1,7 +1,7 @@
 'use client';
 
 import React from 'react';
-import { PlanetConfig, StarSystem, SpaceStationAssembly } from '../lib/supabaseClient';
+import type { PlanetConfig, StarSystem, SpaceStationAssembly } from '../lib/supabase-types';
 import { Shield, Sparkles, Zap, HeartHandshake, Compass, Thermometer } from 'lucide-react';
 
 interface TelemetryPanelProps {

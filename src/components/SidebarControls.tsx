@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
-import { PlanetConfig, StarSystem } from '../lib/supabaseClient';
+import type { PlanetConfig, StarSystem } from '../lib/supabase-types';
 import { Plus, Trash, Globe, ShieldAlert, Zap, Orbit } from 'lucide-react';
 
 interface SidebarControlsProps {
