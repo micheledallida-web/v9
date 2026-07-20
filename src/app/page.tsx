@@ -171,6 +171,72 @@ const FEATURES = [
 ];
 
 const TECH_TAGS = ["React", "Next.js", "Flutter", "React Native", "Supabase", "Firebase", "Stripe", "PostgreSQL", "Vector Databases", "File Storage", "Cloud Functions", "GitHub Integration", "One Click Deploy"];
+const PRICING_TIERS = [
+  {
+    name: "Free",
+    description: "A simple starting point to explore QuickStart.Ai and validate your first product ideas.",
+    price: "$0",
+    ctaLabel: "Get Started",
+    icon: Zap,
+    features: [
+      "Core product building workflows",
+      "Foundational generation and preview tools",
+      "A starter path to explore the platform",
+    ],
+  },
+  {
+    name: "Pro",
+    description: "The most balanced plan for serious builders shipping polished web and mobile experiences.",
+    price: "$15",
+    ctaLabel: "Try QuickStart.Ai",
+    icon: Layout,
+    highlight: true,
+    features: [
+      "Everything in Free, plus:",
+      "Expanded workflows for production-ready app building",
+      "Additional collaboration and automation capabilities",
+    ],
+  },
+  {
+    name: "Premium",
+    description: "A high-touch tier for advanced teams orchestrating larger systems and more complex launches.",
+    price: "$150",
+    ctaLabel: "Get Started",
+    icon: Cpu,
+    features: [
+      "Everything in Pro, plus:",
+      "Advanced platform access for larger delivery needs",
+      "Priority-ready infrastructure and workflow coverage",
+    ],
+  },
+] as const;
+
+const FOOTER_LINK_COLUMNS = [
+  {
+    title: "Product",
+    links: [
+      { label: "Features", href: "#features" },
+      { label: "Pricing", href: "#pricing" },
+      { label: "Get Started", href: "#signup" },
+    ],
+  },
+  {
+    title: "Company",
+    links: [
+      { label: "About", href: "#" },
+      { label: "Contact", href: "#" },
+      { label: "Careers", href: "#" },
+    ],
+  },
+  {
+    title: "Legal",
+    links: [
+      { label: "Terms of Service", href: "#" },
+      { label: "Privacy Policy", href: "#" },
+    ],
+  },
+] as const;
+
 const AUTH_SIMULATION_DELAY_MS = 1800;
 
 function AuthButton({
@@ -306,7 +372,200 @@ export default function LandingPage() {
             </div>
           </div>
         </section>
+
+        <section id="features" className="px-6 py-24">
+          <div className="max-w-7xl mx-auto space-y-12">
+            <Reveal className="max-w-3xl">
+              <p className="text-sm font-semibold uppercase tracking-[0.28em] text-brandGreen">What is QuickStart.Ai</p>
+              <h2 className="mt-4 text-3xl sm:text-4xl md:text-5xl font-bold tracking-tight text-white">
+                QuickStart.Ai helps teams <span className="text-brandGreen">Build Full-Stack Web &amp; Mobile Apps in Minutes</span>.
+              </h2>
+              <p className="mt-5 text-base sm:text-lg leading-relaxed text-brandTextSec">
+                Instantly generate native mobile applications, progressive web apps, production APIs, schema-perfect databases, authentication architectures, AI agents, secure cloud storage, and fully automated deployment configurations using simple natural language.
+              </p>
+            </Reveal>
+
+            <Reveal>
+              <div className="flex flex-wrap gap-3">
+                {TECH_TAGS.map((tag) => (
+                  <span key={tag} className="rounded-pill border border-brandBorder bg-brandSurface px-4 py-2 text-sm font-medium text-white/80">
+                    {tag}
+                  </span>
+                ))}
+              </div>
+            </Reveal>
+
+            <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
+              {FEATURES.map((feature) => {
+                const Icon = feature.icon;
+
+                return (
+                  <Reveal key={feature.title}>
+                    <article className="glass-card rounded-premium h-full p-6 sm:p-7">
+                      <div className="flex items-start gap-4">
+                        <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl border border-brandBorder bg-brandSurfaceAccent text-brandGreen">
+                          <Icon className="h-5 w-5" />
+                        </div>
+                        <div className="space-y-3">
+                          <p className="text-xs font-semibold uppercase tracking-[0.22em] text-brandGreen/80">{feature.tag}</p>
+                          <h3 className="text-xl font-semibold text-white">{feature.title}</h3>
+                          <p className="text-sm leading-relaxed text-brandTextSec">{feature.desc}</p>
+                        </div>
+                      </div>
+                    </article>
+                  </Reveal>
+                );
+              })}
+            </div>
+          </div>
+        </section>
+
+        <section id="pricing" className="px-6 py-24">
+          <div className="max-w-7xl mx-auto space-y-10">
+            <Reveal className="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
+              <div className="max-w-3xl">
+                <p className="text-sm font-semibold uppercase tracking-[0.28em] text-brandGreen">Pricing</p>
+                <h2 className="mt-4 text-3xl sm:text-4xl md:text-5xl font-bold tracking-tight text-white">
+                  Choose the plan that fits your build velocity.
+                </h2>
+                <p className="mt-5 text-base sm:text-lg leading-relaxed text-brandTextSec">
+                  Dark, cinematic, and built to scale with the same QuickStart.Ai product experience you see above.
+                </p>
+              </div>
+
+              <div className="inline-flex items-center rounded-pill border border-brandBorder bg-brandSurface p-1 text-sm">
+                <button type="button" className="rounded-pill bg-white px-4 py-2 font-semibold text-black">
+                  Monthly
+                </button>
+                <button type="button" disabled className="rounded-pill px-4 py-2 font-semibold text-white/45">
+                  Annual Soon
+                </button>
+              </div>
+            </Reveal>
+
+            <div className="grid gap-6 xl:grid-cols-3">
+              {PRICING_TIERS.map((tier) => {
+                const Icon = tier.icon;
+
+                return (
+                  <Reveal key={tier.name} className="h-full">
+                    <article
+                      className={`glass-card rounded-premium relative flex h-full flex-col p-6 sm:p-8 ${tier.highlight ? "pro-glow-border border border-brandGreen/40 bg-brandSurfaceAccent shadow-[0_25px_80px_-40px_rgba(142,240,138,0.55)] xl:-translate-y-3" : ""}`}
+                    >
+                      {tier.highlight && (
+                        <span className="mb-6 inline-flex w-fit rounded-pill border border-brandGreen/30 bg-brandGreen/10 px-3 py-1 text-xs font-semibold uppercase tracking-[0.22em] text-brandGreen">
+                          Most Popular
+                        </span>
+                      )}
+
+                      <div className="flex items-start justify-between gap-4">
+                        <div>
+                          <h3 className="text-2xl font-semibold text-white">{tier.name}</h3>
+                          <p className="mt-3 text-sm leading-relaxed text-brandTextSec">{tier.description}</p>
+                        </div>
+                        <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl border border-brandBorder bg-brandSurface text-brandGreen">
+                          <Icon className="h-5 w-5" />
+                        </div>
+                      </div>
+
+                      <div className="mt-8 flex items-end gap-2">
+                        <span className="text-5xl font-bold tracking-tight text-white">{tier.price}</span>
+                        <span className="pb-1 text-sm font-medium text-brandGreen">/ month</span>
+                      </div>
+
+                      <div className="mt-8 flex-1">
+                        <ul className="space-y-4 text-sm text-brandTextSec">
+                          {/* Placeholder pricing features only — replace these with final tier details once confirmed. */}
+                          {tier.features.map((feature) => (
+                            <li key={feature} className="flex items-start gap-3">
+                              <span className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-brandGreen/10 text-brandGreen">
+                                <Check className="h-3.5 w-3.5" />
+                              </span>
+                              <span className="leading-relaxed">{feature}</span>
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+
+                      <button
+                        type="button"
+                        onClick={() => openAuthModal()}
+                        className={`mt-8 inline-flex w-full items-center justify-center rounded-pill px-5 py-3.5 text-sm font-semibold transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-brandGreen/40 ${tier.highlight ? "bg-brandGreen text-black hover:bg-white" : "border border-brandBorder bg-brandSurface text-white hover:border-brandGreen/40 hover:bg-brandSurfaceAccent"}`}
+                      >
+                        {tier.ctaLabel}
+                      </button>
+                    </article>
+                  </Reveal>
+                );
+              })}
+            </div>
+          </div>
+        </section>
       </main>
+
+      <footer className="relative z-10 border-t border-brandBorder px-6 py-14">
+        <div className="max-w-7xl mx-auto flex flex-col gap-12 lg:flex-row lg:items-start lg:justify-between">
+          <Reveal className="max-w-sm">
+            <a href="#" className="inline-flex items-center gap-3 rounded-full focus:outline-none focus:ring-2 focus:ring-brandGreen/40" aria-label="QuickStart.Ai Homepage">
+              <div className="relative flex h-10 w-10 items-center justify-center overflow-hidden">
+                <Q3DCanvas scale={0.8} className="absolute h-10 w-10 pointer-events-none" />
+              </div>
+              <span className="text-xl font-bold tracking-tight text-white">
+                QuickStart<span className="text-brandGreen">.Ai</span>
+              </span>
+            </a>
+            <p className="mt-5 text-sm leading-relaxed text-brandTextSec">
+              Build Full-Stack <span className="text-brandGreen">Web &amp; Mobile Apps in Minutes</span> with one cohesive platform for product generation, infrastructure, and launch-ready workflows.
+            </p>
+          </Reveal>
+
+          <div className="grid gap-10 sm:grid-cols-2 lg:grid-cols-4">
+            {FOOTER_LINK_COLUMNS.map((column) => (
+              <Reveal key={column.title}>
+                <div>
+                  <h3 className="text-sm font-semibold uppercase tracking-[0.22em] text-white/80">{column.title}</h3>
+                  <ul className="mt-4 space-y-3">
+                    {column.links.map((link) => (
+                      <li key={link.label}>
+                        <a href={link.href} className="text-sm text-brandTextSec transition-colors duration-200 hover:text-brandGreen">
+                          {link.label}
+                        </a>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              </Reveal>
+            ))}
+
+            <Reveal>
+              <div>
+                <h3 className="text-sm font-semibold uppercase tracking-[0.22em] text-white/80">Social</h3>
+                <div className="mt-4 flex flex-wrap gap-3">
+                  {[
+                    { label: "GitHub", icon: Github },
+                    { label: "X", icon: X },
+                    { label: "Twitter", icon: Twitter },
+                    { label: "Slack", icon: Slack },
+                  ].map((social) => {
+                    const Icon = social.icon;
+
+                    return (
+                      <a
+                        key={social.label}
+                        href="#"
+                        aria-label={social.label}
+                        className="inline-flex h-11 w-11 items-center justify-center rounded-full border border-brandBorder bg-brandSurface text-white/70 transition-all duration-300 hover:border-brandGreen/40 hover:text-brandGreen"
+                      >
+                        <Icon className="h-4 w-4" />
+                      </a>
+                    );
+                  })}
+                </div>
+              </div>
+            </Reveal>
+          </div>
+        </div>
+      </footer>
 
       <LoginModal
         isOpen={authModalOpen}
