@@ -1,6 +1,6 @@
 "use client";
 
-import { Component, Suspense, useMemo, useRef, type ReactNode } from "react";
+import { Component, Suspense, useMemo, useRef, useState, type ReactNode } from "react";
 import { Canvas, useFrame } from "@react-three/fiber";
 import { Environment, Sparkles } from "@react-three/drei";
 import * as THREE from "three";
@@ -198,9 +198,17 @@ export default function Q3DCanvasScene({
    *  modal — stay transparent and blend into the page behind them). */
   withBackdrop?: boolean;
 }) {
+  // Tracks whether the WebGL context/scene has completed its first commit, so
+  // the canvas can fade smoothly into view instead of abruptly "popping in"
+  // once the lazily-loaded chunk finishes mounting — purely a timing/opacity
+  // fix, no colors/lighting/materials are touched.
+  const [isReady, setIsReady] = useState(false);
+
   return (
     <Canvas
       className={className}
+      style={{ opacity: isReady ? 1 : 0, transition: "opacity 400ms ease-out" }}
+      onCreated={() => setIsReady(true)}
       gl={{ alpha: true, antialias: true, toneMapping: THREE.ACESFilmicToneMapping, toneMappingExposure: 1.0 }}
       dpr={[1, 2]}
       // Slight three-quarter angle: raised and shifted to the right of center so

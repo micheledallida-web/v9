@@ -478,14 +478,14 @@ export default function LandingPage() {
             </div>
           </section>
         )}
-        <section className="min-h-screen flex flex-col items-center justify-center px-6 relative overflow-hidden py-20">
-          <div className="w-12 h-12 md:w-16 md:h-16 flex items-center justify-center relative reveal-element active z-10 mb-4">
-            <Q3DCanvas scale={1.1} className="w-full h-full" />
+        <section className="min-h-screen flex flex-col items-center justify-start px-6 relative overflow-hidden pt-14 pb-16">
+          <div className="w-[110px] h-[110px] md:w-32 md:h-32 flex items-center justify-center relative reveal-element active z-10 mb-2">
+            <Q3DCanvas scale={1.5} className="w-full h-full" />
           </div>
-          <div className="max-w-4xl text-center mx-auto mt-6 z-20 reveal-element active">
+          <div className="max-w-4xl text-center mx-auto mt-2 z-20 reveal-element active">
             <h1 className="text-4xl sm:text-6xl md:text-7xl font-bold tracking-tighter leading-[1.05] text-white">Build Full-Stack<br /><span className="text-brandGreen">Web & Mobile Apps in Minutes</span></h1>
           </div>
-          <div id="signup" className="w-full max-w-md mx-auto mt-12 z-20 reveal-element active space-y-6">
+          <div id="signup" className="w-full max-w-md mx-auto mt-8 z-20 reveal-element active space-y-6">
             <ProviderButton loadingLabel="Authorization Pending..." onProviderAuth={handleProviderAuth} provider="Google" className="w-full inline-flex items-center justify-center gap-2 bg-white text-black py-4 px-6 rounded-pill text-base font-semibold transition-all duration-300 hover:bg-brandGreen hover:scale-[1.01] focus:outline-none focus:ring-2 focus:ring-brandGreen/40 shadow-lg group">
               <GoogleIcon className={PROVIDER_ICON_CLASS} />
               <span>Continue with Google</span>
