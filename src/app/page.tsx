@@ -442,6 +442,9 @@ export default function LandingPage() {
     }
   }
 
+  const heroSecondaryActionButtonClass =
+    "inline-flex items-center justify-center gap-2 py-4 px-5 bg-brandSurface hover:bg-brandSurfaceAccent border border-brandBorder rounded-pill text-sm font-semibold transition-all duration-300 hover:scale-[1.01] hover:border-brandGreen/40 focus:outline-none focus:ring-1 focus:ring-brandGreen/40";
+
   return (
     <div className="bg-brandBg text-white antialiased font-sans overflow-x-hidden selection:bg-brandGreen selection:text-black min-h-screen relative">
       <CustomCursor />
@@ -517,8 +520,8 @@ export default function LandingPage() {
                 <div className="flex-1 h-px bg-white/15" />
               </div>
               <div className="grid grid-cols-2 gap-4">
-                <button type="button" onClick={() => openAuthModal("email")} className="inline-flex items-center justify-center gap-2 py-4 px-5 bg-brandSurface hover:bg-brandSurfaceAccent border border-brandBorder rounded-pill text-sm font-semibold transition-all duration-300 hover:scale-[1.01] hover:border-brandGreen/40 focus:outline-none focus:ring-1 focus:ring-brandGreen/40"><Mail className={`${PROVIDER_ICON_CLASS} text-white/80`} />Continue with Email</button>
-                <button type="button" onClick={() => openAuthModal("phone")} className="inline-flex items-center justify-center gap-2 py-4 px-5 bg-brandSurface hover:bg-brandSurfaceAccent border border-brandBorder rounded-pill text-sm font-semibold transition-all duration-300 hover:scale-[1.01] hover:border-brandGreen/40 focus:outline-none focus:ring-1 focus:ring-brandGreen/40"><Phone className={`${PROVIDER_ICON_CLASS} text-white/80`} />Continue with Phone</button>
+                <button type="button" onClick={() => openAuthModal("email")} className={heroSecondaryActionButtonClass}><Mail className={`${PROVIDER_ICON_CLASS} text-white/80`} />Continue with Email</button>
+                <button type="button" onClick={() => openAuthModal("phone")} className={heroSecondaryActionButtonClass}><Phone className={`${PROVIDER_ICON_CLASS} text-white/80`} />Continue with Phone</button>
               </div>
             </div>
           </div>
