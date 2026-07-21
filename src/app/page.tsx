@@ -483,7 +483,7 @@ export default function LandingPage() {
           <div className="relative mb-6 flex items-center justify-center overflow-visible" style={{ width: 144, height: 144 }}>
             <div
               className="absolute q-logo-backdrop pointer-events-none"
-              style={{ top: "-45%", left: "-45%", right: "-45%", bottom: "-5%", zIndex: 0 }}
+              style={{ inset: "-45%", transform: "translateY(-18%)", zIndex: 0 }}
             />
             <div className="relative z-10 w-full h-full overflow-visible">
               <Q3DCanvas scale={1.5} className="w-full h-full" withBackdrop />
@@ -517,8 +517,8 @@ export default function LandingPage() {
                 <div className="flex-1 h-px bg-white/15" />
               </div>
               <div className="grid grid-cols-2 gap-4">
-                <button onClick={() => openAuthModal("email")} className="inline-flex items-center justify-center gap-2 py-4 px-5 bg-brandSurface hover:bg-brandSurfaceAccent border border-brandBorder rounded-pill text-sm font-semibold transition-all duration-300 hover:scale-[1.01] hover:border-brandGreen/40 focus:outline-none focus:ring-1 focus:ring-brandGreen/40"><Mail className={`${PROVIDER_ICON_CLASS} text-white/80`} />Continue with Email</button>
-                <button onClick={() => openAuthModal("phone")} className="inline-flex items-center justify-center gap-2 py-4 px-5 bg-brandSurface hover:bg-brandSurfaceAccent border border-brandBorder rounded-pill text-sm font-semibold transition-all duration-300 hover:scale-[1.01] hover:border-brandGreen/40 focus:outline-none focus:ring-1 focus:ring-brandGreen/40"><Phone className={`${PROVIDER_ICON_CLASS} text-white/80`} />Continue with Phone</button>
+                <button type="button" onClick={() => openAuthModal("email")} className="inline-flex items-center justify-center gap-2 py-4 px-5 bg-brandSurface hover:bg-brandSurfaceAccent border border-brandBorder rounded-pill text-sm font-semibold transition-all duration-300 hover:scale-[1.01] hover:border-brandGreen/40 focus:outline-none focus:ring-1 focus:ring-brandGreen/40"><Mail className={`${PROVIDER_ICON_CLASS} text-white/80`} />Continue with Email</button>
+                <button type="button" onClick={() => openAuthModal("phone")} className="inline-flex items-center justify-center gap-2 py-4 px-5 bg-brandSurface hover:bg-brandSurfaceAccent border border-brandBorder rounded-pill text-sm font-semibold transition-all duration-300 hover:scale-[1.01] hover:border-brandGreen/40 focus:outline-none focus:ring-1 focus:ring-brandGreen/40"><Phone className={`${PROVIDER_ICON_CLASS} text-white/80`} />Continue with Phone</button>
               </div>
             </div>
           </div>
