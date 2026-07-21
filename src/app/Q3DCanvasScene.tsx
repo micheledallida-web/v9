@@ -2,10 +2,21 @@
 
 import { Component, Suspense, useMemo, useRef, type ReactNode } from "react";
 import { Canvas, useFrame } from "@react-three/fiber";
-import { Environment } from "@react-three/drei";
+import { Environment, Sparkles } from "@react-three/drei";
 import * as THREE from "three";
 
 const ROTATION_PERIOD_SECONDS = 16; // one full revolution every 16s, constant/linear
+
+// Obsidian black — deep, near-mirror body color shared by the ring and the tail.
+const OBSIDIAN_BLACK = "#030303";
+
+// The tail protrudes from the bottom-right of the ring at a fixed diagonal.
+// Both the tail's position and its rotation are derived from this single angle
+// (measured from +X, clockwise = negative) so the blade always points radially
+// outward along the same line it's anchored on — see the mesh below for why the
+// rotation needs an extra -PI/2 offset.
+const TAIL_ANGLE = -Math.PI / 4; // 45° down-and-to-the-right
+const TAIL_ANCHOR_RADIUS = 2.35;
 
 class EnvironmentErrorBoundary extends Component<{ children: ReactNode }, { hasError: boolean }> {
   state = { hasError: false };
@@ -28,16 +39,19 @@ class EnvironmentErrorBoundary extends Component<{ children: ReactNode }, { hasE
 function QLogo({ scale = 1 }: { scale?: number }) {
   const groupRef = useRef<THREE.Group>(null);
 
-  const silverPBRMaterial = useMemo(
+  // Shared by the ring AND the tail so both read as one continuous piece of
+  // ultra-glossy obsidian metal — deep black body with crisp mirror-bright
+  // specular highlights rather than a flat matte or silver look.
+  const obsidianMirrorMaterial = useMemo(
     () =>
       new THREE.MeshPhysicalMaterial({
-        color: 0xe0e0e0,
-        metalness: 1.0,
-        roughness: 0.28,
-        clearcoat: 0.2,
-        clearcoatRoughness: 0.05,
-        reflectivity: 0.85,
-        envMapIntensity: 1.2,
+        color: OBSIDIAN_BLACK,
+        metalness: 0.95,
+        roughness: 0.05,
+        clearcoat: 1.0,
+        clearcoatRoughness: 0.03,
+        reflectivity: 1.0,
+        envMapIntensity: 1.4,
         flatShading: false,
       }),
     []
@@ -103,35 +117,64 @@ function QLogo({ scale = 1 }: { scale?: number }) {
 
   return (
     <group ref={groupRef} scale={[scale, scale, scale]}>
-      <mesh geometry={ringGeometry} material={silverPBRMaterial} />
-      {/* The blade's long axis starts along local +Y (90°), so it must be rotated by
-          -0.88 - PI/2 (not just -0.88) to actually point radially outward along the
-          -0.88 rad direction — otherwise the blade ends up angled ~90° off from where
-          `position` places it, leaving a visible gap instead of tucking into the ring.
-          Position is shifted in along the same radial direction (relative to the
-          previous, longer tail) so the shorter/thicker flag keeps the same inner
-          overlap behind the ring's lower-right edge while the tip still extends
-          clearly past the ring's outer radius. Rotation/position are static
-          (relative to the group), so the tail still spins together with the ring
-          via the shared groupRef — the overall spin animation is unchanged. */}
+      <mesh geometry={ringGeometry} material={obsidianMirrorMaterial} />
+      {/* Sharp, straight diagonal block tail, protruding from the bottom-right
+          of the ring at TAIL_ANGLE (45°) — replaces the old curved/wavy tail.
+          The blade's long axis starts along local +Y (90°), so it must be
+          rotated by TAIL_ANGLE - PI/2 (not just TAIL_ANGLE) to actually point
+          radially outward along the TAIL_ANGLE direction — otherwise the blade
+          ends up angled ~90° off from where `position` places it, leaving a
+          visible gap instead of tucking into the ring. Position sits along the
+          same radial direction so the flag keeps its inner overlap behind the
+          ring's lower-right edge while the tip still extends clearly past the
+          ring's outer radius. It shares `obsidianMirrorMaterial` (and the same
+          bevel/clearcoat extrude settings as the ring) so it reads as one
+          continuous piece of metal. Rotation/position are static (relative to
+          the group), so the tail still spins together with the ring via the
+          shared groupRef — the overall spin animation is unchanged. */}
       <mesh
         geometry={tailGeometry}
-        material={silverPBRMaterial}
-        rotation={[0, 0, -0.88 - Math.PI / 2]}
-        position={[1.52, -1.8, 0]}
+        material={obsidianMirrorMaterial}
+        rotation={[0, 0, TAIL_ANGLE - Math.PI / 2]}
+        position={[
+          TAIL_ANCHOR_RADIUS * Math.cos(TAIL_ANGLE),
+          TAIL_ANCHOR_RADIUS * Math.sin(TAIL_ANGLE),
+          0,
+        ]}
       />
     </group>
   );
 }
 
-export default function Q3DCanvasScene({ scale = 1, className = "" }: { scale?: number; className?: string }) {
+export default function Q3DCanvasScene({
+  scale = 1,
+  className = "",
+  withBackdrop = false,
+}: {
+  scale?: number;
+  className?: string;
+  /** Pitch-black background + faint ambient particles, for standalone/hero display
+   *  (kept off by default so the small inline logo instances — nav, footer, login
+   *  modal — stay transparent and blend into the page behind them). */
+  withBackdrop?: boolean;
+}) {
   return (
     <Canvas
       className={className}
       gl={{ alpha: true, antialias: true, toneMapping: THREE.ACESFilmicToneMapping, toneMappingExposure: 1.0 }}
       dpr={[1, 2]}
-      camera={{ fov: 45, near: 0.1, far: 100, position: [0, 0, 7] }}
+      // Slight three-quarter angle: raised and shifted to the right of center so
+      // the ring's right outer edge and top-inner rim catch visible depth/shading
+      // instead of the flat, dead-on silhouette a straight-on [0,0,z] camera gives.
+      camera={{ fov: 45, near: 0.1, far: 100, position: [2.4, 1.7, 6.1] }}
     >
+      {withBackdrop && (
+        <>
+          <color attach="background" args={["#000000"]} />
+          {/* Faint ambient particles drifting in the dark background. */}
+          <Sparkles count={80} scale={9} size={1.4} speed={0.25} opacity={0.35} color="#ffffff" />
+        </>
+      )}
       {/* Environment loads an HDRI asynchronously; if the fetch fails (e.g. a
           network hiccup or blocked CDN) it throws rather than just suspending,
           which would otherwise crash the whole canvas. Suspense + an error
@@ -143,16 +186,20 @@ export default function Q3DCanvasScene({ scale = 1, className = "" }: { scale?: 
         </EnvironmentErrorBoundary>
       </Suspense>
       {/* Raised ambient plus an added front-lower fill light so the ring reads as a
-          consistent silver metal all the way around as it spins, instead of the
-          far side falling into near-black shadow and only catching bright silver
-          highlights on the near side (previously it visibly "switched" between
-          dark and silver mid-rotation). */}
-      <ambientLight intensity={0.75} />
-      <directionalLight position={[5, 5, 4]} intensity={1.8} />
+          consistent obsidian metal all the way around as it spins, instead of the
+          far side falling into total black and only catching highlights on the
+          near side (previously it visibly "switched" between dark and lit
+          mid-rotation). */}
+      <ambientLight intensity={0.45} />
+      {/* Crisp, bright white specular key light from the upper right — this is what
+          produces the sharp mirror-bright highlight along the ring's right outer
+          rim edge. */}
+      <directionalLight position={[5, 5, 4]} intensity={2.6} color="#ffffff" />
+      {/* Soft directional rim light (brand-green tinted) grazing the far edge. */}
       <directionalLight position={[-6, -6, -4]} intensity={0.35} color={0x8ef08a} />
-      <directionalLight position={[-4, 6, -3]} intensity={2.0} />
+      <directionalLight position={[-4, 6, -3]} intensity={1.6} color="#ffffff" />
       {/* Front-lower fill light — added alongside the raised ambient above. */}
-      <directionalLight position={[4, -5, 5]} intensity={1.0} />
+      <directionalLight position={[4, -5, 5]} intensity={0.8} color="#ffffff" />
       <QLogo scale={scale} />
     </Canvas>
   );

@@ -7,6 +7,14 @@ import dynamic from "next/dynamic";
 // so the actual scene is loaded client-side only.
 const Q3DCanvasScene = dynamic(() => import("./Q3DCanvasScene"), { ssr: false });
 
-export default function Q3DCanvas({ scale = 1, className = "" }: { scale?: number; className?: string }) {
-  return <Q3DCanvasScene scale={scale} className={className} />;
+export default function Q3DCanvas({
+  scale = 1,
+  className = "",
+  withBackdrop = false,
+}: {
+  scale?: number;
+  className?: string;
+  withBackdrop?: boolean;
+}) {
+  return <Q3DCanvasScene scale={scale} className={className} withBackdrop={withBackdrop} />;
 }

@@ -480,7 +480,7 @@ export default function LandingPage() {
         )}
         <section className="min-h-screen flex flex-col items-center justify-center px-6 relative overflow-hidden py-20">
           <div className="w-full max-w-[340px] h-[340px] md:max-w-[420px] md:h-[420px] flex items-center justify-center relative reveal-element active z-10">
-            <Q3DCanvas scale={1.05} className="w-full h-full cursor-grab active:cursor-grabbing" />
+            <Q3DCanvas scale={1.05} className="w-full h-full cursor-grab active:cursor-grabbing" withBackdrop />
           </div>
           <div className="max-w-4xl text-center mx-auto mt-6 z-20 reveal-element active">
             <h1 className="text-4xl sm:text-6xl md:text-7xl font-bold tracking-tighter leading-[1.05] text-white">Build Full-Stack<br /><span className="text-brandGreen">Web & Mobile Apps in Minutes</span></h1>
