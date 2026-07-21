@@ -177,10 +177,10 @@ export default function LoginModal({ isOpen, onClose, onProviderAuth, onEmailSig
 
   const heading = (
     <h2 className="max-w-[19rem] text-center text-[clamp(1.2rem,5vw,2.4rem)] font-bold leading-[1.15] tracking-tight sm:max-w-[21rem]">
-      Describe your idea
+      Build Full-Stack
       <br />
       <span className="bg-gradient-to-r from-emerald-300 via-emerald-400 to-emerald-500 bg-clip-text text-transparent">
-        Build websites &amp; apps with AI
+        Web &amp; Mobile Apps in Minutes
       </span>
     </h2>
   );
@@ -242,22 +242,7 @@ export default function LoginModal({ isOpen, onClose, onProviderAuth, onEmailSig
     "flex h-12 w-full items-center justify-center gap-2 rounded-2xl border border-white/10 bg-neutral-900/60 text-sm sm:text-base font-semibold text-white transition hover:border-emerald-500/30";
 
   return (
-    <div className="fixed inset-0 z-[10000] flex min-h-dvh w-full flex-col overflow-y-auto bg-[#0B0B0B] text-white">
-      <div
-        className="pointer-events-none fixed inset-0"
-        style={{
-          background:
-            "radial-gradient(circle at 15% 10%, rgba(16,185,129,0.08), transparent 45%), radial-gradient(circle at 85% 85%, rgba(16,185,129,0.06), transparent 50%)",
-        }}
-      />
-
-      <div
-        className="relative z-10 w-full border-b border-emerald-500/20 bg-emerald-950/40 px-4 py-2.5 text-center text-xs text-emerald-200/90 sm:text-sm"
-        style={{ paddingTop: "max(0.625rem, env(safe-area-inset-top))" }}
-      >
-        🚀 QuickStart.Ai now generates full-stack apps in minutes
-      </div>
-
+    <div className="fixed inset-0 z-[10000] flex min-h-dvh w-full flex-col overflow-y-auto bg-black text-white">
       <button
         onClick={handleClose}
         className="absolute right-4 top-4 z-20 flex h-9 w-9 items-center justify-center rounded-full border border-white/20 text-white/80 transition hover:border-white/40 hover:text-white"
