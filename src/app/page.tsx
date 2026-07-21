@@ -298,47 +298,84 @@ export default function LandingPage() {
   /** Returns a configured Supabase client, or null with an alert if env vars are missing. */
   function getSupabaseOrWarn() {
     if (!isSupabaseConfigured) {
+      const missing = [
+        !process.env.NEXT_PUBLIC_SUPABASE_URL && "NEXT_PUBLIC_SUPABASE_URL",
+        !process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY && "NEXT_PUBLIC_SUPABASE_ANON_KEY",
+      ].filter(Boolean);
+      // eslint-disable-next-line no-console
+      console.error(
+        `Supabase is not configured: missing environment variable(s): ${missing.join(", ")}. ` +
+          "Set these in your deployment environment (e.g. Vercel Project Settings → Environment Variables) and redeploy.",
+      );
       alert("Authentication is currently unavailable. Please try again later or contact support.");
       return null;
     }
-    return createSupabaseBrowserClient();
+    try {
+      return createSupabaseBrowserClient();
+    } catch (error) {
+      // eslint-disable-next-line no-console
+      console.error("Failed to create Supabase browser client:", error);
+      alert("Authentication is currently unavailable. Please try again later or contact support.");
+      return null;
+    }
   }
 
   async function handleProviderAuth(provider: string) {
     const supabase = getSupabaseOrWarn();
     if (!supabase) return;
-    await supabase.auth.signInWithOAuth({
-      provider: provider.toLowerCase() as Provider,
-      options: { redirectTo: `${window.location.origin}/dashboard` },
-    });
+    try {
+      const { error } = await supabase.auth.signInWithOAuth({
+        provider: provider.toLowerCase() as Provider,
+        options: { redirectTo: `${window.location.origin}/dashboard` },
+      });
+      if (error) {
+        console.error("Supabase OAuth sign-in error:", error);
+        alert(error.message);
+      }
+    } catch (error) {
+      console.error("Unexpected error during OAuth sign-in:", error);
+      alert("Authentication is currently unavailable. Please try again later or contact support.");
+    }
   }
 
   async function handleEmailSignUp(payload: { name: string; email: string; password: string }) {
     const supabase = getSupabaseOrWarn();
     if (!supabase) return;
-    const { error } = await supabase.auth.signUp({
-      email: payload.email,
-      password: payload.password,
-      options: { data: { full_name: payload.name } },
-    });
-    if (error) {
-      alert(error.message);
-    } else {
-      router.push("/dashboard");
+    try {
+      const { error } = await supabase.auth.signUp({
+        email: payload.email,
+        password: payload.password,
+        options: { data: { full_name: payload.name } },
+      });
+      if (error) {
+        console.error("Supabase sign-up error:", error);
+        alert(error.message);
+      } else {
+        router.push("/dashboard");
+      }
+    } catch (error) {
+      console.error("Unexpected error during sign-up:", error);
+      alert("Authentication is currently unavailable. Please try again later or contact support.");
     }
   }
 
   async function handleEmailSignIn(payload: { email: string; password: string }) {
     const supabase = getSupabaseOrWarn();
     if (!supabase) return;
-    const { error } = await supabase.auth.signInWithPassword({
-      email: payload.email,
-      password: payload.password,
-    });
-    if (error) {
-      alert(error.message);
-    } else {
-      router.push("/dashboard");
+    try {
+      const { error } = await supabase.auth.signInWithPassword({
+        email: payload.email,
+        password: payload.password,
+      });
+      if (error) {
+        console.error("Supabase sign-in error:", error);
+        alert(error.message);
+      } else {
+        router.push("/dashboard");
+      }
+    } catch (error) {
+      console.error("Unexpected error during sign-in:", error);
+      alert("Authentication is currently unavailable. Please try again later or contact support.");
     }
   }
 
@@ -352,9 +389,15 @@ export default function LandingPage() {
       return;
     }
     const phone = `${dialCode}${localNumber}`;
-    const { error } = await supabase.auth.signInWithOtp({ phone });
-    if (error) {
-      alert(error.message);
+    try {
+      const { error } = await supabase.auth.signInWithOtp({ phone });
+      if (error) {
+        console.error("Supabase phone sign-in error:", error);
+        alert(error.message);
+      }
+    } catch (error) {
+      console.error("Unexpected error during phone sign-in:", error);
+      alert("Authentication is currently unavailable. Please try again later or contact support.");
     }
   }
 
