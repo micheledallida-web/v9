@@ -44,7 +44,12 @@ const SHARED_EXTRUDE_SETTINGS = {
 // flat, dead-on silhouette a straight-on [0, 0, z] camera would give.
 const CAMERA_X_OFFSET = 2.4; // shift right, toward the ring's outer edge
 const CAMERA_Y_ELEVATION = 1.7; // raise above center, toward the top-inner rim
-const CAMERA_Z_DISTANCE = 6.1; // pull back far enough to frame the whole logo
+// Pulled back further than the ring's own footprint requires so that the
+// tail's full diagonal reach (TAIL_OUTER_REACH) stays inside the camera's
+// frustum at every angle of the 360° Y-axis spin, instead of just clearing
+// the ring alone — this is what stops the tail tip from hard-clipping
+// against the canvas edges as it rotates through.
+const CAMERA_Z_DISTANCE = 7.4;
 
 // GlintLight config: a fast-orbiting point light, independent of the slow 16s
 // body spin, so a bright specular glint visibly sweeps across the ring/tail's

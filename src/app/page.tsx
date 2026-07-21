@@ -479,7 +479,7 @@ export default function LandingPage() {
           </section>
         )}
         <section className="min-h-screen flex flex-col items-center justify-start px-6 relative overflow-hidden pt-14 pb-16">
-          <div className="w-[110px] h-[110px] md:w-32 md:h-32 flex items-center justify-center relative reveal-element active z-10 mb-6 overflow-visible">
+          <div className="w-[124px] h-[124px] md:w-36 md:h-36 flex items-center justify-center relative reveal-element active z-10 mb-8 overflow-visible">
             <Q3DCanvas scale={1.5} className="w-full h-full" />
           </div>
           <div className="max-w-4xl text-center mx-auto mt-2 z-20 reveal-element active">
