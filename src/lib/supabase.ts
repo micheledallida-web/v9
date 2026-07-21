@@ -3,7 +3,7 @@ import type { SupabaseClient } from '@supabase/supabase-js';
 
 import { isSupabaseConfigured } from './supabaseClient';
 
-export { isSupabaseConfigured, requireSupabaseClient, getMissingSupabaseEnvVars } from './supabaseClient';
+export { isSupabaseConfigured, requireSupabaseClient, getMissingSupabaseEnvVars, describeMissingSupabaseEnvVars } from './supabaseClient';
 
 let _browserClient: SupabaseClient | null = null;
 

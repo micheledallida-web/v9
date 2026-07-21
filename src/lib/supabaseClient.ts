@@ -21,17 +21,22 @@ export const isSupabaseConfigured = Boolean(supabaseUrl && supabaseAnonKey);
 /** Returns the names of the required Supabase env vars that are missing/undefined. */
 export function getMissingSupabaseEnvVars(): string[] {
   return [
-    !supabaseUrl && "NEXT_PUBLIC_SUPABASE_URL",
-    !supabaseAnonKey && "NEXT_PUBLIC_SUPABASE_ANON_KEY",
-  ].filter((value): value is string => Boolean(value));
+    !supabaseUrl ? "NEXT_PUBLIC_SUPABASE_URL" : null,
+    !supabaseAnonKey ? "NEXT_PUBLIC_SUPABASE_ANON_KEY" : null,
+  ].filter((value): value is string => value !== null);
+}
+
+/** Builds a human-readable diagnostic message for missing Supabase env vars. */
+export function describeMissingSupabaseEnvVars(): string {
+  return (
+    `Supabase is not configured: missing environment variable(s): ${getMissingSupabaseEnvVars().join(", ")}. ` +
+    "Set these in your deployment environment (e.g. Vercel Project Settings → Environment Variables) and redeploy."
+  );
 }
 
 if (!isSupabaseConfigured) {
   // eslint-disable-next-line no-console
-  console.error(
-    `Supabase client is not configured: missing environment variable(s): ${getMissingSupabaseEnvVars().join(", ")}. ` +
-      "Auth and database calls will fall back to local storage until these are set.",
-  );
+  console.error(describeMissingSupabaseEnvVars());
 }
 
 function createSharedSupabaseClient(): SupabaseClient | null {
