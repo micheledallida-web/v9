@@ -176,7 +176,7 @@ export default function LoginModal({ isOpen, onClose, onProviderAuth, onEmailSig
   );
 
   const heading = (
-    <h2 className="max-w-[19rem] text-center text-[clamp(1.2rem,5vw,2.4rem)] font-semibold leading-[1.08] tracking-tight sm:max-w-[21rem]">
+    <h2 className="max-w-[19rem] text-center text-[clamp(1.2rem,5vw,2.4rem)] font-semibold leading-[1.15] tracking-tight sm:max-w-[21rem]">
       Build Full-Stack
       <br />
       <span className="text-brandGreen">Web &amp; Mobile Apps in Minutes</span>
@@ -222,10 +222,7 @@ export default function LoginModal({ isOpen, onClose, onProviderAuth, onEmailSig
         }}
       >
         <div
-          className="relative w-full max-w-[27rem] overflow-y-auto overscroll-contain rounded-[30px] border border-brandBorder bg-brandSurface px-4 pb-5 pt-4 text-white shadow-[0_30px_120px_rgba(0,0,0,0.55)] sm:px-6 sm:pb-6 sm:pt-5"
-          style={{
-            maxHeight: "calc(100svh - env(safe-area-inset-top) - env(safe-area-inset-bottom) - 2rem)",
-          }}
+          className="auth-modal-shell relative w-full max-w-[27rem] overflow-y-auto overscroll-contain rounded-[30px] border border-brandBorder bg-brandSurface px-4 pb-5 pt-4 text-white shadow-[0_30px_120px_rgba(0,0,0,0.55)] sm:px-6 sm:pb-6 sm:pt-5"
           role="dialog"
           aria-modal="true"
         >

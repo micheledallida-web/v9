@@ -123,3 +123,13 @@ body {
   90% { opacity: 1; }
   100% { left: 100%; opacity: 0; }
 }
+
+.auth-modal-shell {
+  max-height: calc(100vh - env(safe-area-inset-top) - env(safe-area-inset-bottom) - 2rem);
+}
+
+@supports (height: 100svh) {
+  .auth-modal-shell {
+    max-height: calc(100svh - env(safe-area-inset-top) - env(safe-area-inset-bottom) - 2rem);
+  }
+}
