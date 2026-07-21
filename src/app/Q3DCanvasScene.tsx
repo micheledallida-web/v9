@@ -4,19 +4,59 @@ import { Component, Suspense, useMemo, useRef, type ReactNode } from "react";
 import { Canvas, useFrame } from "@react-three/fiber";
 import { Environment, Sparkles } from "@react-three/drei";
 import * as THREE from "three";
+import { mergeGeometries } from "three/examples/jsm/utils/BufferGeometryUtils.js";
 
 const ROTATION_PERIOD_SECONDS = 16; // one full revolution every 16s, constant/linear
 
 // Obsidian black — deep, near-mirror body color shared by the ring and the tail.
 const OBSIDIAN_BLACK = "#030303";
 
-// The tail protrudes from the bottom-right of the ring at a fixed diagonal.
-// Both the tail's position and its rotation are derived from this single angle
-// (measured from +X, clockwise = negative) so the blade always points radially
-// outward along the same line it's anchored on — see the mesh below for why the
-// rotation needs an extra -PI/2 offset.
+// Ring proportions, shared by the ring shape and the tail's penetration math below.
+const RING_OUTER_RADIUS = 2.0;
+const RING_INNER_RADIUS = 1.35; // inner hollow / hole boundary
+
+// The tail is a straight diagonal block that crosses through the ring wall —
+// it starts inside the inner hollow (radius < RING_INNER_RADIUS), passes through
+// the bottom-right section of the wall (between RING_INNER_RADIUS and
+// RING_OUTER_RADIUS), and continues outward past the outer edge, all along a
+// single radial line at TAIL_ANGLE (measured from +X, clockwise = negative).
 const TAIL_ANGLE = -Math.PI / 4; // 45° down-and-to-the-right
-const TAIL_ANCHOR_RADIUS = 2.35;
+const TAIL_INNER_REACH = 0.55; // well inside the hollow, short of the center
+const TAIL_OUTER_REACH = 2.75; // protrudes past the outer wall
+const TAIL_STROKE_WIDTH = 0.8;
+
+// Shared extrude settings so the tail has identical depth/bevel/curve quality
+// as the ring — this is what lets the two pieces merge into one seamless mesh.
+const EXTRUDE_DEPTH = 0.5;
+const SHARED_EXTRUDE_SETTINGS = {
+  depth: EXTRUDE_DEPTH,
+  bevelEnabled: true,
+  bevelSegments: 32,
+  curveSegments: 128, // fixes the faceted/low-poly look — was defaulting to 12
+  steps: 2,
+  bevelSize: 0.06,
+  bevelThickness: 0.06,
+};
+
+// Camera position for the slight three-quarter viewing angle described in the
+// design brief: shifted right and raised above center so the ring's right
+// outer edge and top-inner rim catch visible depth/shading, instead of the
+// flat, dead-on silhouette a straight-on [0, 0, z] camera would give.
+const CAMERA_X_OFFSET = 2.4; // shift right, toward the ring's outer edge
+const CAMERA_Y_ELEVATION = 1.7; // raise above center, toward the top-inner rim
+const CAMERA_Z_DISTANCE = 6.1; // pull back far enough to frame the whole logo
+
+// GlintLight config: a fast-orbiting point light, independent of the slow 16s
+// body spin, so a bright specular glint visibly sweeps across the ring/tail's
+// beveled edges every few seconds instead of only reflecting the fixed
+// key/rim lights.
+const GLINT_PERIOD_SECONDS = 4.5;
+const GLINT_ORBIT_RADIUS = 3.4;
+// Flattens the orbit's Y extent relative to X, so the glint traces an
+// ellipse (wide sweep, shallow rise/fall) rather than a full circle — this
+// keeps the flash grazing across the ring's edges instead of swinging
+// directly overhead/underneath where it would be less visible.
+const GLINT_VERTICAL_COMPRESSION = 0.5;
 
 class EnvironmentErrorBoundary extends Component<{ children: ReactNode }, { hasError: boolean }> {
   state = { hasError: false };
@@ -57,56 +97,61 @@ function QLogo({ scale = 1 }: { scale?: number }) {
     []
   );
 
-  const ringGeometry = useMemo(() => {
+  const logoGeometry = useMemo(() => {
+    // --- Ring: a flat annulus (outer circle minus inner hole), extruded. ---
     const ringShape = new THREE.Shape();
-    ringShape.absarc(0, 0, 2.0, 0, Math.PI * 2, false);
+    ringShape.absarc(0, 0, RING_OUTER_RADIUS, 0, Math.PI * 2, false);
 
     const innerHole = new THREE.Path();
-    innerHole.absarc(0, 0, 1.35, 0, Math.PI * 2, true);
+    innerHole.absarc(0, 0, RING_INNER_RADIUS, 0, Math.PI * 2, true);
     ringShape.holes.push(innerHole);
 
-    const extrudeSettings = {
-      depth: 0.5,
-      bevelEnabled: true,
-      bevelSegments: 32,
-      curveSegments: 128, // fixes the faceted/low-poly look — was defaulting to 12
-      steps: 2,
-      bevelSize: 0.06,
-      bevelThickness: 0.06,
-    };
+    const ringGeometry = new THREE.ExtrudeGeometry(ringShape, SHARED_EXTRUDE_SETTINGS);
 
-    const geometry = new THREE.ExtrudeGeometry(ringShape, extrudeSettings);
-    geometry.center();
-    return geometry;
-  }, []);
-
-  const tailGeometry = useMemo(() => {
-    // Tail — bold, squared-off diagonal flag matching the reference "Q" glyph:
-    // thicker and shorter than the previous thin blade, so it reads as a chunky
-    // typographic descender rather than a slender spike.
-    const tailStrokeWidth = 0.85;
-    const tailBladeLength = 1.8;
-
+    // --- Tail: a straight block built directly along the target radial line,
+    // so it naturally starts inside the hollow and ends past the outer wall —
+    // no boolean subtraction is needed because the ring already has an open
+    // hole for the tail to cross through. ---
     const tailShape = new THREE.Shape();
-    tailShape.moveTo(-tailStrokeWidth / 2, 0);
-    tailShape.lineTo(tailStrokeWidth / 2, 0);
-    tailShape.lineTo(tailStrokeWidth / 2, tailBladeLength);
-    tailShape.lineTo(-tailStrokeWidth / 2, tailBladeLength);
+    tailShape.moveTo(-TAIL_STROKE_WIDTH / 2, TAIL_INNER_REACH);
+    tailShape.lineTo(TAIL_STROKE_WIDTH / 2, TAIL_INNER_REACH);
+    tailShape.lineTo(TAIL_STROKE_WIDTH / 2, TAIL_OUTER_REACH);
+    tailShape.lineTo(-TAIL_STROKE_WIDTH / 2, TAIL_OUTER_REACH);
     tailShape.closePath();
 
-    const tailExtrudeSettings = {
-      depth: 0.5,
-      bevelEnabled: true,
-      bevelSegments: 32,
-      curveSegments: 128,
-      steps: 2,
-      bevelSize: 0.06,
-      bevelThickness: 0.06,
-    };
+    const tailGeometry = new THREE.ExtrudeGeometry(tailShape, SHARED_EXTRUDE_SETTINGS);
+    // The shape's local +Y axis currently points straight "up" (90°); rotating
+    // it about the shared origin by (TAIL_ANGLE - PI/2) swings that same axis
+    // to point along TAIL_ANGLE instead, so the block now runs from
+    // TAIL_INNER_REACH to TAIL_OUTER_REACH along the 45° diagonal — starting
+    // inside the ring's inner hollow, crossing the wall, and exiting outward.
+    tailGeometry.rotateZ(TAIL_ANGLE - Math.PI / 2);
 
-    const geometry = new THREE.ExtrudeGeometry(tailShape, tailExtrudeSettings);
-    geometry.center();
-    return geometry;
+    // Merge into a single BufferGeometry (one mesh, one draw call) so the tail
+    // reads as an inseparable part of the ring body rather than a bolted-on
+    // piece — same depth, bevel, and material by construction.
+    const merged = mergeGeometries([ringGeometry, tailGeometry], false);
+    if (!merged) {
+      // mergeGeometries only returns null if attribute layouts mismatch, which
+      // can't happen here since both shapes use the same ExtrudeGeometry
+      // settings — kept as a defensive fallback so a build-time regression
+      // still renders the ring (without its tail) instead of crashing the
+      // canvas outright.
+      // eslint-disable-next-line no-console
+      console.warn(
+        "Q3DCanvas: failed to merge ring and tail geometries (mismatched attribute layout); rendering ring only."
+      );
+      const fallback = ringGeometry.clone();
+      fallback.center();
+      return fallback;
+    }
+    // Both pieces share identical extrude settings, so their z-range is
+    // already identical; simply re-center that shared depth around 0 without
+    // touching x/y (which must stay put — the ring's circular symmetry keeps
+    // it centered, and the tail's radial offset from the origin must not be
+    // disturbed, or it would no longer line up with the ring's hole/wall).
+    merged.translate(0, 0, -EXTRUDE_DEPTH / 2);
+    return merged;
   }, []);
 
   useFrame((_, delta) => {
@@ -117,33 +162,28 @@ function QLogo({ scale = 1 }: { scale?: number }) {
 
   return (
     <group ref={groupRef} scale={[scale, scale, scale]}>
-      <mesh geometry={ringGeometry} material={obsidianMirrorMaterial} />
-      {/* Sharp, straight diagonal block tail, protruding from the bottom-right
-          of the ring at TAIL_ANGLE (45°) — replaces the old curved/wavy tail.
-          The blade's long axis starts along local +Y (90°), so it must be
-          rotated by TAIL_ANGLE - PI/2 (not just TAIL_ANGLE) to actually point
-          radially outward along the TAIL_ANGLE direction — otherwise the blade
-          ends up angled ~90° off from where `position` places it, leaving a
-          visible gap instead of tucking into the ring. Position sits along the
-          same radial direction so the flag keeps its inner overlap behind the
-          ring's lower-right edge while the tip still extends clearly past the
-          ring's outer radius. It shares `obsidianMirrorMaterial` (and the same
-          bevel/clearcoat extrude settings as the ring) so it reads as one
-          continuous piece of metal. Rotation/position are static (relative to
-          the group), so the tail still spins together with the ring via the
-          shared groupRef — the overall spin animation is unchanged. */}
-      <mesh
-        geometry={tailGeometry}
-        material={obsidianMirrorMaterial}
-        rotation={[0, 0, TAIL_ANGLE - Math.PI / 2]}
-        position={[
-          TAIL_ANCHOR_RADIUS * Math.cos(TAIL_ANGLE),
-          TAIL_ANCHOR_RADIUS * Math.sin(TAIL_ANGLE),
-          0,
-        ]}
-      />
+      <mesh geometry={logoGeometry} material={obsidianMirrorMaterial} />
     </group>
   );
+}
+
+// A fast-orbiting point light, independent of the slow 16s body spin, so a
+// bright specular glint visibly sweeps across the ring/tail's beveled edges
+// every few seconds instead of only reflecting the fixed key/rim lights.
+function GlintLight() {
+  const lightRef = useRef<THREE.PointLight>(null);
+
+  useFrame(({ clock }) => {
+    if (!lightRef.current) return;
+    const angle = (clock.getElapsedTime() / GLINT_PERIOD_SECONDS) * Math.PI * 2;
+    lightRef.current.position.set(
+      Math.cos(angle) * GLINT_ORBIT_RADIUS,
+      Math.sin(angle) * GLINT_ORBIT_RADIUS * GLINT_VERTICAL_COMPRESSION,
+      2.6
+    );
+  });
+
+  return <pointLight ref={lightRef} color="#ffffff" intensity={6} distance={9} decay={2} />;
 }
 
 export default function Q3DCanvasScene({
@@ -166,7 +206,12 @@ export default function Q3DCanvasScene({
       // Slight three-quarter angle: raised and shifted to the right of center so
       // the ring's right outer edge and top-inner rim catch visible depth/shading
       // instead of the flat, dead-on silhouette a straight-on [0,0,z] camera gives.
-      camera={{ fov: 45, near: 0.1, far: 100, position: [2.4, 1.7, 6.1] }}
+      camera={{
+        fov: 45,
+        near: 0.1,
+        far: 100,
+        position: [CAMERA_X_OFFSET, CAMERA_Y_ELEVATION, CAMERA_Z_DISTANCE],
+      }}
     >
       {withBackdrop && (
         <>
@@ -200,6 +245,7 @@ export default function Q3DCanvasScene({
       <directionalLight position={[-4, 6, -3]} intensity={1.6} color="#ffffff" />
       {/* Front-lower fill light — added alongside the raised ambient above. */}
       <directionalLight position={[4, -5, 5]} intensity={0.8} color="#ffffff" />
+      <GlintLight />
       <QLogo scale={scale} />
     </Canvas>
   );
