@@ -28,16 +28,23 @@ class EnvironmentErrorBoundary extends Component<{ children: ReactNode }, { hasE
 function QLogo({ scale = 1 }: { scale?: number }) {
   const groupRef = useRef<THREE.Group>(null);
 
-  const silverPBRMaterial = useMemo(
+  // Black dark chrome — a near-black metallic base with a low roughness and a
+  // clearcoat layer so highlights stay sharp/high-contrast instead of the
+  // broad, milky specular a lighter metal would show. envMapIntensity is kept
+  // modest so environment reflections add sharp glints without washing the
+  // dark base out toward grey/silver. This single material instance is shared
+  // by every mesh in the logo (ring + tail) so tone/gloss can never drift
+  // between parts or across the animation.
+  const blackChromeMaterial = useMemo(
     () =>
       new THREE.MeshPhysicalMaterial({
-        color: 0xe0e0e0,
+        color: 0x050505,
         metalness: 1.0,
-        roughness: 0.28,
-        clearcoat: 0.2,
-        clearcoatRoughness: 0.05,
-        reflectivity: 0.85,
-        envMapIntensity: 1.2,
+        roughness: 0.16,
+        clearcoat: 0.6,
+        clearcoatRoughness: 0.08,
+        reflectivity: 0.9,
+        envMapIntensity: 0.55,
         flatShading: false,
       }),
     []
@@ -67,31 +74,28 @@ function QLogo({ scale = 1 }: { scale?: number }) {
   }, []);
 
   const tailGeometry = useMemo(() => {
-    // Tail — bold, squared-off diagonal flag matching the reference "Q" glyph:
-    // thicker and shorter than the previous thin blade, so it reads as a chunky
-    // typographic descender rather than a slender spike.
-    const tailStrokeWidth = 0.85;
-    const tailBladeLength = 1.8;
+    // Tail — a rounded, tube-swept leg with the same cross-sectional thickness
+    // as the ring (~0.63, matching the ring's ~0.65 radial width / ~0.62 depth)
+    // so it reads as one continuous glossy letterform instead of a flat,
+    // separate stroke. The path is authored directly in the ring's local
+    // space (ring is centered on the origin) rather than centered/repositioned
+    // afterwards, so the start point can be embedded inside the ring band for
+    // a seamless join and the curve can genuinely dip behind the ring (-Z) to
+    // sweep across and cross through/under it before flicking back out to the
+    // tip, matching the reference glyph's leg.
+    const tailPath = new THREE.CatmullRomCurve3(
+      [
+        new THREE.Vector3(1.68 * Math.cos(-0.75), 1.68 * Math.sin(-0.75), 0), // embedded in ring band
+        new THREE.Vector3(2.05, -1.55, 0.05), // emerges past the ring's outer edge
+        new THREE.Vector3(1.15, -2.55, -0.22), // sweeps across, dipping behind the ring
+        new THREE.Vector3(2.05, -3.35, 0.05), // rounded tip, back in front
+      ],
+      false,
+      "centripetal"
+    );
 
-    const tailShape = new THREE.Shape();
-    tailShape.moveTo(-tailStrokeWidth / 2, 0);
-    tailShape.lineTo(tailStrokeWidth / 2, 0);
-    tailShape.lineTo(tailStrokeWidth / 2, tailBladeLength);
-    tailShape.lineTo(-tailStrokeWidth / 2, tailBladeLength);
-    tailShape.closePath();
-
-    const tailExtrudeSettings = {
-      depth: 0.5,
-      bevelEnabled: true,
-      bevelSegments: 32,
-      curveSegments: 128,
-      steps: 2,
-      bevelSize: 0.06,
-      bevelThickness: 0.06,
-    };
-
-    const geometry = new THREE.ExtrudeGeometry(tailShape, tailExtrudeSettings);
-    geometry.center();
+    const tubeRadius = 0.315; // matches the ring's cross-section thickness
+    const geometry = new THREE.TubeGeometry(tailPath, 96, tubeRadius, 24, false);
     return geometry;
   }, []);
 
@@ -103,23 +107,14 @@ function QLogo({ scale = 1 }: { scale?: number }) {
 
   return (
     <group ref={groupRef} scale={[scale, scale, scale]}>
-      <mesh geometry={ringGeometry} material={silverPBRMaterial} />
-      {/* The blade's long axis starts along local +Y (90°), so it must be rotated by
-          -0.88 - PI/2 (not just -0.88) to actually point radially outward along the
-          -0.88 rad direction — otherwise the blade ends up angled ~90° off from where
-          `position` places it, leaving a visible gap instead of tucking into the ring.
-          Position is shifted in along the same radial direction (relative to the
-          previous, longer tail) so the shorter/thicker flag keeps the same inner
-          overlap behind the ring's lower-right edge while the tip still extends
-          clearly past the ring's outer radius. Rotation/position are static
-          (relative to the group), so the tail still spins together with the ring
-          via the shared groupRef — the overall spin animation is unchanged. */}
-      <mesh
-        geometry={tailGeometry}
-        material={silverPBRMaterial}
-        rotation={[0, 0, -0.88 - Math.PI / 2]}
-        position={[1.52, -1.8, 0]}
-      />
+      <mesh geometry={ringGeometry} material={blackChromeMaterial} />
+      {/* The tail path above is authored directly in the ring's local space
+          (ring is centered on the origin), so the tube mesh needs no extra
+          position/rotation offset here — it already joins the ring exactly
+          where the curve was designed to overlap it. Sharing the same
+          material instance keeps tone/gloss identical between the ring and
+          the tail. */}
+      <mesh geometry={tailGeometry} material={blackChromeMaterial} />
     </group>
   );
 }
@@ -142,17 +137,17 @@ export default function Q3DCanvasScene({ scale = 1, className = "" }: { scale?: 
           <Environment preset="studio" />
         </EnvironmentErrorBoundary>
       </Suspense>
-      {/* Raised ambient plus an added front-lower fill light so the ring reads as a
-          consistent silver metal all the way around as it spins, instead of the
-          far side falling into near-black shadow and only catching bright silver
-          highlights on the near side (previously it visibly "switched" between
-          dark and silver mid-rotation). */}
-      <ambientLight intensity={0.75} />
-      <directionalLight position={[5, 5, 4]} intensity={1.8} />
-      <directionalLight position={[-6, -6, -4]} intensity={0.35} color={0x8ef08a} />
-      <directionalLight position={[-4, 6, -3]} intensity={2.0} />
-      {/* Front-lower fill light — added alongside the raised ambient above. */}
-      <directionalLight position={[4, -5, 5]} intensity={1.0} />
+      {/* Lighting is kept low-key and neutral (no colored fill) so the dark
+          chrome base tone never brightens toward grey/silver. Four symmetric
+          neutral-white directional lights (front/back/left/right) keep sharp,
+          high-contrast specular highlights moving across the surface as the
+          logo spins, without any single side reading flatter/lighter than
+          another over a full rotation. */}
+      <ambientLight intensity={0.12} />
+      <directionalLight position={[5, 4, 5]} intensity={1.6} />
+      <directionalLight position={[-5, 4, -5]} intensity={1.6} />
+      <directionalLight position={[5, -3, -5]} intensity={0.9} />
+      <directionalLight position={[-5, -3, 5]} intensity={0.9} />
       <QLogo scale={scale} />
     </Canvas>
   );
