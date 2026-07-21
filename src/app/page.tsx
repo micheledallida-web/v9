@@ -329,10 +329,12 @@ export default function LandingPage() {
         options: { redirectTo: `${window.location.origin}/dashboard` },
       });
       if (error) {
+        // eslint-disable-next-line no-console
         console.error("Supabase OAuth sign-in error:", error);
         alert(error.message);
       }
     } catch (error) {
+      // eslint-disable-next-line no-console
       console.error("Unexpected error during OAuth sign-in:", error);
       alert("Authentication is currently unavailable. Please try again later or contact support.");
     }
@@ -348,12 +350,14 @@ export default function LandingPage() {
         options: { data: { full_name: payload.name } },
       });
       if (error) {
+        // eslint-disable-next-line no-console
         console.error("Supabase sign-up error:", error);
         alert(error.message);
       } else {
         router.push("/dashboard");
       }
     } catch (error) {
+      // eslint-disable-next-line no-console
       console.error("Unexpected error during sign-up:", error);
       alert("Authentication is currently unavailable. Please try again later or contact support.");
     }
@@ -368,12 +372,14 @@ export default function LandingPage() {
         password: payload.password,
       });
       if (error) {
+        // eslint-disable-next-line no-console
         console.error("Supabase sign-in error:", error);
         alert(error.message);
       } else {
         router.push("/dashboard");
       }
     } catch (error) {
+      // eslint-disable-next-line no-console
       console.error("Unexpected error during sign-in:", error);
       alert("Authentication is currently unavailable. Please try again later or contact support.");
     }
@@ -392,10 +398,12 @@ export default function LandingPage() {
     try {
       const { error } = await supabase.auth.signInWithOtp({ phone });
       if (error) {
+        // eslint-disable-next-line no-console
         console.error("Supabase phone sign-in error:", error);
         alert(error.message);
       }
     } catch (error) {
+      // eslint-disable-next-line no-console
       console.error("Unexpected error during phone sign-in:", error);
       alert("Authentication is currently unavailable. Please try again later or contact support.");
     }
