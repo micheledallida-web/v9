@@ -113,7 +113,7 @@ export default function Q3DCanvas({ scale = 1, className = "" }: { scale?: numbe
     crispBackLight.position.set(-4.2, 6.5, -2.5);
     scene.add(crispBackLight);
 
-    const topSparkLight = new THREE.PointLight(0xffffff, 8, 24, 2);
+    const topSparkLight = new THREE.PointLight(0xffffff, 8, 24);
     topSparkLight.position.set(0, 3.6, 6);
     scene.add(topSparkLight);
 

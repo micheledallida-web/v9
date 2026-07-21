@@ -224,8 +224,10 @@ export default function LoginModal({ isOpen, onClose, onProviderAuth, onEmailSig
         <div
           className="relative w-full max-w-[27rem] overflow-y-auto overscroll-contain rounded-[30px] border border-brandBorder bg-brandSurface px-4 pb-5 pt-4 text-white shadow-[0_30px_120px_rgba(0,0,0,0.55)] sm:px-6 sm:pb-6 sm:pt-5"
           style={{
-            maxHeight: "calc(100dvh - env(safe-area-inset-top) - env(safe-area-inset-bottom) - 2rem)",
+            maxHeight: "calc(100svh - env(safe-area-inset-top) - env(safe-area-inset-bottom) - 2rem)",
           }}
+          role="dialog"
+          aria-modal="true"
         >
           <div
             className="pointer-events-none absolute inset-0 opacity-50"
