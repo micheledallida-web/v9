@@ -167,7 +167,7 @@ export default function LoginModal({ isOpen, onClose, onProviderAuth, onEmailSig
     onClose();
   }
 
-  const spinningQ = (
+  const logoEmblem = (
     <div className="flex justify-center">
       <div className="q-logo-backdrop h-[4.5rem] w-[4.5rem] sm:h-[5.25rem] sm:w-[5.25rem]">
         <Q3DCanvas className="h-full w-full" scale={0.82} />
@@ -176,16 +176,39 @@ export default function LoginModal({ isOpen, onClose, onProviderAuth, onEmailSig
   );
 
   const heading = (
-    <h2 className="max-w-[19rem] text-center text-[clamp(1.2rem,5vw,2.4rem)] font-semibold leading-[1.15] tracking-tight sm:max-w-[21rem]">
-      Build Full-Stack
+    <h2 className="max-w-[19rem] text-center text-[clamp(1.2rem,5vw,2.4rem)] font-bold leading-[1.15] tracking-tight sm:max-w-[21rem]">
+      Describe your idea
       <br />
-      <span className="text-brandGreen">Web &amp; Mobile Apps in Minutes</span>
+      <span className="bg-gradient-to-r from-emerald-300 via-emerald-400 to-emerald-500 bg-clip-text text-transparent">
+        Build websites &amp; apps with AI
+      </span>
     </h2>
   );
 
-  const centeredLogoAndHeading = (
-    <div className="mb-5 flex flex-col items-center gap-4 text-center sm:mb-6 sm:gap-5">
-      {spinningQ}
+  const signInSubtext = (
+    <p className="text-center text-sm text-white/50">
+      Already have an account?{" "}
+      <button
+        type="button"
+        onClick={() => setAuthStep("signin")}
+        className="font-medium text-emerald-400 underline underline-offset-4 transition-colors hover:text-emerald-300"
+      >
+        Sign in
+      </button>
+    </p>
+  );
+
+  const brandingBlock = (
+    <div className="mb-6 flex flex-col items-center gap-4 text-center sm:mb-7 sm:gap-5">
+      {logoEmblem}
+      {heading}
+      {signInSubtext}
+    </div>
+  );
+
+  const brandingBlockNoSubtext = (
+    <div className="mb-6 flex flex-col items-center gap-4 text-center sm:mb-7 sm:gap-5">
+      {logoEmblem}
       {heading}
     </div>
   );
@@ -205,50 +228,57 @@ export default function LoginModal({ isOpen, onClose, onProviderAuth, onEmailSig
 
   const providerIconClass = PROVIDER_ICON_CLASS;
   const primaryProviderButtonClass =
-    "flex h-12 w-full items-center justify-center gap-2 rounded-full bg-white px-4 text-sm font-semibold text-[#151515] transition hover:bg-brandGreen disabled:opacity-60 sm:text-base";
+    "flex h-12 w-full items-center justify-center gap-2 rounded-2xl bg-white px-4 text-sm font-semibold text-black transition hover:bg-emerald-50 disabled:opacity-60 sm:text-base";
   const compactProviderButtonClass =
-    "flex h-11 items-center justify-center gap-2 rounded-full border border-white/15 bg-brandSurfaceAccent px-3 text-sm font-medium transition hover:border-white/30 disabled:opacity-60";
+    "flex h-11 items-center justify-center gap-2 rounded-2xl border border-white/10 bg-neutral-900/60 px-3 text-sm font-medium transition hover:border-emerald-500/30 disabled:opacity-60";
   const alternateMethodButtonClass =
-    "flex h-11 w-full items-center justify-center gap-2 rounded-full border border-white/15 bg-brandSurfaceAccent px-4 text-sm font-semibold transition hover:border-white/30 sm:h-12 sm:text-base";
+    "flex h-11 w-full items-center justify-center gap-2 rounded-2xl border border-white/10 bg-neutral-900/60 px-4 text-sm font-semibold transition hover:border-emerald-500/30 sm:h-12 sm:text-base";
+  const inputWrapperClass =
+    "flex h-12 items-center gap-3 rounded-2xl border border-white/10 bg-neutral-900/60 px-4 transition focus-within:ring-2 focus-within:ring-emerald-500/20";
+  const inputFieldClass = "w-full bg-transparent text-sm sm:text-base placeholder:text-white/40 outline-none";
+  const primaryActionButtonClass =
+    "flex h-12 w-full items-center justify-center gap-2 rounded-2xl bg-white text-sm sm:text-base font-semibold text-black tracking-tight transition hover:bg-emerald-50 disabled:opacity-60";
+  const goBackButtonClass =
+    "flex h-12 w-full items-center justify-center gap-2 rounded-2xl border border-white/10 bg-neutral-900/60 text-sm sm:text-base font-semibold text-white transition hover:border-emerald-500/30";
 
   return (
+    <div className="fixed inset-0 z-[10000] flex min-h-dvh w-full flex-col overflow-y-auto bg-[#0B0B0B] text-white">
       <div
-        className="fixed inset-0 z-[10000] flex items-center justify-center bg-black/80 backdrop-blur-md"
+        className="pointer-events-none fixed inset-0"
         style={{
-          paddingTop: "max(1rem, env(safe-area-inset-top))",
-          paddingRight: "max(1rem, env(safe-area-inset-right))",
-          paddingBottom: "max(1rem, env(safe-area-inset-bottom))",
-          paddingLeft: "max(1rem, env(safe-area-inset-left))",
+          background:
+            "radial-gradient(circle at 15% 10%, rgba(16,185,129,0.08), transparent 45%), radial-gradient(circle at 85% 85%, rgba(16,185,129,0.06), transparent 50%)",
+        }}
+      />
+
+      <div
+        className="relative z-10 w-full border-b border-emerald-500/20 bg-emerald-950/40 px-4 py-2.5 text-center text-xs text-emerald-200/90 sm:text-sm"
+        style={{ paddingTop: "max(0.625rem, env(safe-area-inset-top))" }}
+      >
+        🚀 QuickStart.Ai now generates full-stack apps in minutes
+      </div>
+
+      <button
+        onClick={handleClose}
+        className="absolute right-4 top-4 z-20 flex h-9 w-9 items-center justify-center rounded-full border border-white/20 text-white/80 transition hover:border-white/40 hover:text-white"
+        style={{ top: "max(1rem, env(safe-area-inset-top))" }}
+        aria-label="Close and return to homepage"
+      >
+        ✕
+      </button>
+
+      <main
+        className="relative z-10 mx-auto flex w-full max-w-md flex-1 flex-col justify-center px-6 py-8"
+        style={{
+          paddingTop: "max(2rem, env(safe-area-inset-top))",
+          paddingBottom: "max(2rem, env(safe-area-inset-bottom))",
         }}
       >
-        <div
-          className="auth-modal-shell relative w-full max-w-[27rem] overflow-y-auto overscroll-contain rounded-[30px] border border-brandBorder bg-brandSurface px-4 pb-5 pt-4 text-white shadow-[0_30px_120px_rgba(0,0,0,0.55)] sm:px-6 sm:pb-6 sm:pt-5"
-          role="dialog"
-          aria-modal="true"
-        >
-          <div
-            className="pointer-events-none absolute inset-0 opacity-50"
-            style={{
-              background:
-                "radial-gradient(circle at 20% 20%, rgba(255,255,255,0.06), transparent 40%), radial-gradient(circle at 80% 60%, rgba(255,255,255,0.05), transparent 45%)",
-            }}
-          />
-
-          <div className="relative z-10">
-            <button
-              onClick={handleClose}
-              className="absolute right-0 top-0 flex h-9 w-9 items-center justify-center rounded-full border border-white/20 text-white/80 transition hover:border-white/40 hover:text-white"
-              aria-label="Close login modal"
-            >
-              ✕
-            </button>
-
             {authStep === "options" && (
-              <div className="flex flex-col items-center pt-2 text-center sm:pt-1">
-                {spinningQ}
-                {heading}
+              <div className="flex flex-col items-center text-center">
+                {brandingBlock}
 
-                <div className="mt-6 w-full space-y-3 sm:mt-7">
+                <div className="w-full space-y-3">
                   <ProviderButton
                     provider="Google"
                     onProviderAuth={onProviderAuth}
@@ -264,7 +294,7 @@ export default function LoginModal({ isOpen, onClose, onProviderAuth, onEmailSig
                       onProviderAuth={onProviderAuth}
                       className={compactProviderButtonClass}
                     >
-                      <GitHubIcon className="h-5 w-5 shrink-0 text-brandGreen" />
+                      <GitHubIcon className="h-5 w-5 shrink-0 text-emerald-400" />
                       <span>GitHub</span>
                     </ProviderButton>
                     <ProviderButton
@@ -317,7 +347,7 @@ export default function LoginModal({ isOpen, onClose, onProviderAuth, onEmailSig
 
             {authStep === "email" && (
               <div>
-                {centeredLogoAndHeading}
+                {brandingBlock}
                 <form
                   onSubmit={async (e) => {
                     e.preventDefault();
@@ -325,35 +355,35 @@ export default function LoginModal({ isOpen, onClose, onProviderAuth, onEmailSig
                   }}
                   className="space-y-3"
                 >
-                  <div className="h-11 rounded-full border border-white/15 bg-brandSurfaceAccent px-4 flex items-center gap-3">
+                  <div className={inputWrapperClass}>
                     <UserRound className="h-5 w-5 shrink-0 text-white/45" />
                     <input
                       value={name}
                       onChange={(e) => setName(e.target.value)}
                       placeholder="Enter your name"
-                      className="w-full bg-transparent text-sm sm:text-base placeholder:text-white/40 outline-none"
+                      className={inputFieldClass}
                     />
                   </div>
 
-                  <div className="h-11 rounded-full border border-white/15 bg-brandSurfaceAccent px-4 flex items-center gap-3">
+                  <div className={inputWrapperClass}>
                     <Mail className="h-5 w-5 shrink-0 text-white/45" />
                     <input
                       type="email"
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
                       placeholder="Enter your email"
-                      className="w-full bg-transparent text-sm sm:text-base placeholder:text-white/40 outline-none"
+                      className={inputFieldClass}
                     />
                   </div>
 
-                  <div className="h-11 rounded-full border border-white/15 bg-brandSurfaceAccent px-4 flex items-center gap-3">
+                  <div className={inputWrapperClass}>
                     <KeyRound className="h-5 w-5 shrink-0 text-white/45" />
                     <input
                       type={showPassword ? "text" : "password"}
                       value={password}
                       onChange={(e) => setPassword(e.target.value)}
                       placeholder="Enter your password"
-                      className="w-full bg-transparent text-sm sm:text-base placeholder:text-white/40 outline-none"
+                      className={inputFieldClass}
                     />
                     <button
                       type="button"
@@ -365,12 +395,12 @@ export default function LoginModal({ isOpen, onClose, onProviderAuth, onEmailSig
                     </button>
                   </div>
 
-                  <div className="pt-1 flex items-center gap-3">
-                    <button
-                      type="submit"
-                      className="h-11 w-full rounded-full bg-white text-[#151515] text-sm sm:text-base font-semibold tracking-tight flex items-center justify-center gap-2"
-                    >
+                  <div className="space-y-3 pt-1">
+                    <button type="submit" className={primaryActionButtonClass}>
                       Get Started <ArrowRight className="h-4 w-4" />
+                    </button>
+                    <button type="button" onClick={() => setAuthStep("options")} className={goBackButtonClass}>
+                      <ArrowLeft className="h-4 w-4" /> Go Back
                     </button>
                   </div>
                 </form>
@@ -384,13 +414,13 @@ export default function LoginModal({ isOpen, onClose, onProviderAuth, onEmailSig
                   <button
                     type="button"
                     onClick={() => setAuthStep("email")}
-                    className="underline underline-offset-4 hover:text-brandGreen transition-colors"
+                    className="underline underline-offset-4 hover:text-emerald-400 transition-colors"
                   >
                     Sign up
                   </button>
                 </p>
 
-                {centeredLogoAndHeading}
+                {brandingBlockNoSubtext}
 
                 <form
                   onSubmit={async (e) => {
@@ -399,25 +429,25 @@ export default function LoginModal({ isOpen, onClose, onProviderAuth, onEmailSig
                   }}
                   className="space-y-3"
                 >
-                  <div className="h-11 rounded-full border border-white/15 bg-brandSurfaceAccent px-4 flex items-center gap-3">
+                  <div className={inputWrapperClass}>
                     <Mail className="h-5 w-5 shrink-0 text-white/45" />
                     <input
                       type="email"
                       value={signinEmail}
                       onChange={(e) => setSigninEmail(e.target.value)}
                       placeholder="Enter your email"
-                      className="w-full bg-transparent text-sm sm:text-base placeholder:text-white/40 outline-none"
+                      className={inputFieldClass}
                     />
                   </div>
 
-                  <div className="h-11 rounded-full border border-white/15 bg-brandSurfaceAccent px-4 flex items-center gap-3">
+                  <div className={inputWrapperClass}>
                     <KeyRound className="h-5 w-5 shrink-0 text-white/45" />
                     <input
                       type={showSigninPassword ? "text" : "password"}
                       value={signinPassword}
                       onChange={(e) => setSigninPassword(e.target.value)}
                       placeholder="Enter your password"
-                      className="w-full bg-transparent text-sm sm:text-base placeholder:text-white/40 outline-none"
+                      className={inputFieldClass}
                     />
                     <button
                       type="button"
@@ -435,19 +465,12 @@ export default function LoginModal({ isOpen, onClose, onProviderAuth, onEmailSig
                     </a>
                   </div>
 
-                  <button
-                    type="submit"
-                    className="w-full h-11 rounded-full bg-white text-[#151515] text-sm sm:text-base font-semibold tracking-tight flex items-center justify-center gap-2"
-                  >
+                  <button type="submit" className={primaryActionButtonClass}>
                     Login <ArrowRight className="h-4 w-4" />
                   </button>
 
-                  <button
-                    type="button"
-                    onClick={() => setAuthStep("options")}
-                    className="w-full h-11 rounded-full border border-white/15 bg-brandSurfaceAccent text-sm sm:text-base font-semibold flex items-center justify-center hover:border-white/30 transition"
-                  >
-                    <ArrowLeft className="h-4 w-4 mr-2" /> Go Back
+                  <button type="button" onClick={() => setAuthStep("options")} className={goBackButtonClass}>
+                    <ArrowLeft className="h-4 w-4" /> Go Back
                   </button>
 
                   <div className="pt-1 flex justify-center">
@@ -470,14 +493,14 @@ export default function LoginModal({ isOpen, onClose, onProviderAuth, onEmailSig
 
             {authStep === "phone" && (
               <div>
-                {centeredLogoAndHeading}
+                {brandingBlockNoSubtext}
 
                 <p className="mb-3 text-center text-sm sm:text-base font-medium text-white/85">
                   Already have an account?{" "}
                   <button
                     type="button"
                     onClick={() => setAuthStep("signin")}
-                    className="underline underline-offset-4 hover:text-brandGreen transition-colors"
+                    className="underline underline-offset-4 hover:text-emerald-400 transition-colors"
                   >
                     Sign in
                   </button>
@@ -494,18 +517,18 @@ export default function LoginModal({ isOpen, onClose, onProviderAuth, onEmailSig
                   }}
                   className="space-y-3"
                 >
-                  <div className="h-11 rounded-full border border-white/15 bg-brandSurfaceAccent px-4 flex items-center gap-3">
+                  <div className={inputWrapperClass}>
                     <UserRound className="h-5 w-5 text-white/45" />
                     <input
                       value={name}
                       onChange={(e) => setName(e.target.value)}
                       placeholder="Enter your name"
-                      className="w-full bg-transparent text-sm sm:text-base placeholder:text-white/40 outline-none"
+                      className={inputFieldClass}
                     />
                   </div>
 
                   <div className="space-y-2">
-                    <div className="h-11 rounded-full border border-white/15 bg-brandSurfaceAccent px-3 sm:px-4 flex items-center gap-2">
+                    <div className="flex h-12 items-center gap-2 rounded-2xl border border-white/10 bg-neutral-900/60 px-3 transition focus-within:ring-2 focus-within:ring-emerald-500/20 sm:px-4">
                       <button
                         type="button"
                         onClick={() => setCountryDropdownOpen((value) => !value)}
@@ -524,8 +547,8 @@ export default function LoginModal({ isOpen, onClose, onProviderAuth, onEmailSig
                     </div>
 
                     {countryDropdownOpen && (
-                      <div className="rounded-2xl border border-white/15 bg-brandSurfaceAccent p-2">
-                        <div className="mb-2 h-10 rounded-full border border-white/10 px-3 flex items-center gap-2">
+                      <div className="rounded-2xl border border-white/10 bg-neutral-900/60 p-2">
+                        <div className="mb-2 h-10 rounded-2xl border border-white/10 px-3 flex items-center gap-2 focus-within:ring-2 focus-within:ring-emerald-500/20">
                           <Search className="h-4 w-4 text-white/45" />
                           <input
                             value={countryQuery}
@@ -548,7 +571,7 @@ export default function LoginModal({ isOpen, onClose, onProviderAuth, onEmailSig
                                   setCountryQuery("");
                                 }}
                                 className={`w-full rounded-xl px-3 py-2 flex items-center justify-between text-left transition ${
-                                  isSelected ? "bg-brandGreen/20 text-brandGreen" : "hover:bg-white/5"
+                                  isSelected ? "bg-emerald-500/20 text-emerald-400" : "hover:bg-white/5"
                                 }`}
                               >
                                 <span className="flex items-center gap-2 text-sm">
@@ -564,23 +587,19 @@ export default function LoginModal({ isOpen, onClose, onProviderAuth, onEmailSig
                     )}
                   </div>
 
-                  <div className="pt-1 flex items-center gap-3">
+                  <div className="space-y-3 pt-1">
+                    <button type="submit" className={primaryActionButtonClass}>
+                      Get code <ArrowRight className="h-4 w-4" />
+                    </button>
                     <button
                       type="button"
                       onClick={() => {
                         setAuthStep("options");
                         setCountryDropdownOpen(false);
                       }}
-                      className="h-11 w-11 shrink-0 rounded-full bg-brandSurfaceAccent border border-white/10 text-white flex items-center justify-center"
-                      aria-label="Go back"
+                      className={goBackButtonClass}
                     >
-                      <ArrowLeft className="h-5 w-5" />
-                    </button>
-                    <button
-                      type="submit"
-                      className="h-11 flex-1 rounded-full bg-white text-[#151515] text-sm sm:text-base font-semibold tracking-tight flex items-center justify-center gap-2"
-                    >
-                      Get code <ArrowRight className="h-4 w-4" />
+                      <ArrowLeft className="h-4 w-4" /> Go Back
                     </button>
                   </div>
                 </form>
@@ -588,8 +607,7 @@ export default function LoginModal({ isOpen, onClose, onProviderAuth, onEmailSig
                 {footerLinks}
               </div>
             )}
-          </div>
-        </div>
-      </div>
+      </main>
+    </div>
   );
 }

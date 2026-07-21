@@ -1,61 +1,67 @@
 "use client";
 
-import { Component, Suspense, useMemo, useRef, type ReactNode } from "react";
+import { Component, Suspense, useMemo, useRef, useState, type ReactNode } from "react";
 import { Canvas, useFrame } from "@react-three/fiber";
-import { Environment, Torus, Extrude } from "@react-three/drei";
+import { Environment, Sparkles } from "@react-three/drei";
 import * as THREE from "three";
-
-/**
- * QLogo — animated 3D "Q" brand mark
- *
- * FIX #1: Material color/finish is now driven by a SINGLE constant
- *         (QLOGO_MATERIAL) instead of being interpolated or re-assigned
- *         across animation frames. Nothing in the animation loop below
- *         touches .color, .metalness, .roughness, or .emissive — those
- *         properties are set once, on mount, and never change. That's
- *         what was causing the silver drift: something in the old
- *         animation timeline (a keyframe, a useFrame color lerp, or a
- *         second material swapped in mid-sequence) was overwriting the
- *         starting black-chrome color partway through.
- *
- * FIX #2: The tail/leg of the Q is now a single continuous mesh fused
- *         to the ring (via the `tailGeometry` extrusion below) so it
- *         reads as one connected chrome form that sweeps across and
- *         under the ring, matching the reference image, instead of a
- *         flat separate stroke.
- */
-
-// Single source of truth for the logo's look. Change values here ONLY —
-// nothing else in this file should set color/metalness/roughness again.
-// Base color is lifted slightly off absolute black (#0a0a0c -> #1a1a1a) and
-// combined with a stronger ambient + rim lighting rig below so the mesh
-// always keeps a visible dark-grey silhouette against the pitch-black page
-// background, instead of only flashing into view when a direct specular
-// highlight sweeps across it.
-const QLOGO_MATERIAL = {
-  color: "#1a1a1a", // dark metallic base — lightened from near-black so it never disappears
-  metalness: 0.8,
-  roughness: 0.15, // low roughness = sharp chrome highlights, still catches ambient fill
-  envMapIntensity: 1.6,
-} as const;
-
-function useTailShape() {
-  // Tail path modeled after the reference image: starts at the bottom-left
-  // of the ring, sweeps down and to the right, crossing under the ring.
-  // Adjust these control points to match the reference exactly once you
-  // can measure it against the real ring radius.
-  return useMemo(() => {
-    const shape = new THREE.Shape();
-    shape.moveTo(-0.35, -0.55);
-    shape.quadraticCurveTo(-0.1, -0.95, 0.45, -1.35);
-    shape.lineTo(0.65, -1.15);
-    shape.quadraticCurveTo(0.15, -0.8, -0.05, -0.45);
-    shape.closePath();
-    return shape;
-  }, []);
-}
+import { mergeGeometries } from "three/examples/jsm/utils/BufferGeometryUtils.js";
 
 const ROTATION_PERIOD_SECONDS = 16; // one full revolution every 16s, constant/linear
+
+// Obsidian black — deep, near-mirror body color shared by the ring and the tail.
+const OBSIDIAN_BLACK = "#030303";
+
+// Ring proportions, shared by the ring shape and the tail's penetration math below.
+const RING_OUTER_RADIUS = 2.0;
+const RING_INNER_RADIUS = 1.35; // inner hollow / hole boundary
+
+// The tail is a straight diagonal block that crosses through the ring wall —
+// it starts inside the inner hollow (radius < RING_INNER_RADIUS), passes through
+// the bottom-right section of the wall (between RING_INNER_RADIUS and
+// RING_OUTER_RADIUS), and continues outward past the outer edge, all along a
+// single radial line at TAIL_ANGLE (measured from +X, clockwise = negative).
+const TAIL_ANGLE = -Math.PI / 4; // 45° down-and-to-the-right
+const TAIL_INNER_REACH = 0.55; // well inside the hollow, short of the center
+const TAIL_OUTER_REACH = 2.75; // protrudes past the outer wall
+const TAIL_STROKE_WIDTH = 0.8;
+
+// Shared extrude settings so the tail has identical depth/bevel/curve quality
+// as the ring — this is what lets the two pieces merge into one seamless mesh.
+const EXTRUDE_DEPTH = 0.5;
+const SHARED_EXTRUDE_SETTINGS = {
+  depth: EXTRUDE_DEPTH,
+  bevelEnabled: true,
+  bevelSegments: 32,
+  curveSegments: 128, // fixes the faceted/low-poly look — was defaulting to 12
+  steps: 2,
+  bevelSize: 0.06,
+  bevelThickness: 0.06,
+};
+
+// Camera position for the slight three-quarter viewing angle described in the
+// design brief: shifted right and raised above center so the ring's right
+// outer edge and top-inner rim catch visible depth/shading, instead of the
+// flat, dead-on silhouette a straight-on [0, 0, z] camera would give.
+const CAMERA_X_OFFSET = 2.4; // shift right, toward the ring's outer edge
+const CAMERA_Y_ELEVATION = 1.7; // raise above center, toward the top-inner rim
+// Pulled back further than the ring's own footprint requires so that the
+// tail's full diagonal reach (TAIL_OUTER_REACH) stays inside the camera's
+// frustum at every angle of the 360° Y-axis spin, instead of just clearing
+// the ring alone — this is what stops the tail tip from hard-clipping
+// against the canvas edges as it rotates through.
+const CAMERA_Z_DISTANCE = 7.4;
+
+// GlintLight config: a fast-orbiting point light, independent of the slow 16s
+// body spin, so a bright specular glint visibly sweeps across the ring/tail's
+// beveled edges every few seconds instead of only reflecting the fixed
+// key/rim lights.
+const GLINT_PERIOD_SECONDS = 4.5;
+const GLINT_ORBIT_RADIUS = 3.4;
+// Flattens the orbit's Y extent relative to X, so the glint traces an
+// ellipse (wide sweep, shallow rise/fall) rather than a full circle — this
+// keeps the flash grazing across the ring's edges instead of swinging
+// directly overhead/underneath where it would be less visible.
+const GLINT_VERTICAL_COMPRESSION = 0.5;
 
 class EnvironmentErrorBoundary extends Component<{ children: ReactNode }, { hasError: boolean }> {
   state = { hasError: false };
@@ -77,54 +83,156 @@ class EnvironmentErrorBoundary extends Component<{ children: ReactNode }, { hasE
 
 function QLogo({ scale = 1 }: { scale?: number }) {
   const groupRef = useRef<THREE.Group>(null);
-  const tailShape = useTailShape();
 
-  const extrudeSettings = useMemo(
-    () => ({ depth: 0.3, bevelEnabled: true, bevelThickness: 0.04, bevelSize: 0.04, bevelSegments: 4 }),
+  // Shared by the ring AND the tail so both read as one continuous piece of
+  // ultra-glossy obsidian metal — deep black body with crisp mirror-bright
+  // specular highlights rather than a flat matte or silver look.
+  const obsidianMirrorMaterial = useMemo(
+    () =>
+      new THREE.MeshPhysicalMaterial({
+        color: OBSIDIAN_BLACK,
+        metalness: 0.95,
+        roughness: 0.05,
+        clearcoat: 1.0,
+        clearcoatRoughness: 0.03,
+        reflectivity: 1.0,
+        envMapIntensity: 1.4,
+        flatShading: false,
+      }),
     []
   );
 
-  // Rotation-only animation. This is the ONLY thing that should run every
-  // frame — no material/color mutation belongs in this loop.
-  useFrame((_, delta) => {
-    if (groupRef.current) {
-      groupRef.current.rotation.y += (delta * (Math.PI * 2)) / ROTATION_PERIOD_SECONDS;
+  const logoGeometry = useMemo(() => {
+    // --- Ring: a flat annulus (outer circle minus inner hole), extruded. ---
+    const ringShape = new THREE.Shape();
+    ringShape.absarc(0, 0, RING_OUTER_RADIUS, 0, Math.PI * 2, false);
+
+    const innerHole = new THREE.Path();
+    innerHole.absarc(0, 0, RING_INNER_RADIUS, 0, Math.PI * 2, true);
+    ringShape.holes.push(innerHole);
+
+    const ringGeometry = new THREE.ExtrudeGeometry(ringShape, SHARED_EXTRUDE_SETTINGS);
+
+    // --- Tail: a straight block built directly along the target radial line,
+    // so it naturally starts inside the hollow and ends past the outer wall —
+    // no boolean subtraction is needed because the ring already has an open
+    // hole for the tail to cross through. ---
+    const tailShape = new THREE.Shape();
+    tailShape.moveTo(-TAIL_STROKE_WIDTH / 2, TAIL_INNER_REACH);
+    tailShape.lineTo(TAIL_STROKE_WIDTH / 2, TAIL_INNER_REACH);
+    tailShape.lineTo(TAIL_STROKE_WIDTH / 2, TAIL_OUTER_REACH);
+    tailShape.lineTo(-TAIL_STROKE_WIDTH / 2, TAIL_OUTER_REACH);
+    tailShape.closePath();
+
+    const tailGeometry = new THREE.ExtrudeGeometry(tailShape, SHARED_EXTRUDE_SETTINGS);
+    // The shape's local +Y axis currently points straight "up" (90°); rotating
+    // it about the shared origin by (TAIL_ANGLE - PI/2) swings that same axis
+    // to point along TAIL_ANGLE instead, so the block now runs from
+    // TAIL_INNER_REACH to TAIL_OUTER_REACH along the 45° diagonal — starting
+    // inside the ring's inner hollow, crossing the wall, and exiting outward.
+    tailGeometry.rotateZ(TAIL_ANGLE - Math.PI / 2);
+
+    // Merge into a single BufferGeometry (one mesh, one draw call) so the tail
+    // reads as an inseparable part of the ring body rather than a bolted-on
+    // piece — same depth, bevel, and material by construction.
+    const merged = mergeGeometries([ringGeometry, tailGeometry], false);
+    if (!merged) {
+      // mergeGeometries only returns null if attribute layouts mismatch, which
+      // can't happen here since both shapes use the same ExtrudeGeometry
+      // settings — kept as a defensive fallback so a build-time regression
+      // still renders the ring (without its tail) instead of crashing the
+      // canvas outright.
+      // eslint-disable-next-line no-console
+      console.warn(
+        "Q3DCanvas: failed to merge ring and tail geometries (mismatched attribute layout); rendering ring only."
+      );
+      const fallback = ringGeometry.clone();
+      fallback.center();
+      return fallback;
     }
+    // Both pieces share identical extrude settings, so their z-range is
+    // already identical; simply re-center that shared depth around 0 without
+    // touching x/y (which must stay put — the ring's circular symmetry keeps
+    // it centered, and the tail's radial offset from the origin must not be
+    // disturbed, or it would no longer line up with the ring's hole/wall).
+    merged.translate(0, 0, -EXTRUDE_DEPTH / 2);
+    return merged;
+  }, []);
+
+  useFrame((_, delta) => {
+    if (!groupRef.current) return;
+    // Continuous linear Y-axis rotation only — no easing, no acceleration.
+    groupRef.current.rotation.y += (delta * (Math.PI * 2)) / ROTATION_PERIOD_SECONDS;
   });
 
   return (
     <group ref={groupRef} scale={[scale, scale, scale]}>
-      <Torus args={[1, 0.35, 64, 128]} rotation={[0, 0, 0]}>
-        <meshStandardMaterial {...QLOGO_MATERIAL} />
-      </Torus>
-
-      <Extrude args={[tailShape, extrudeSettings]} position={[0, 0, -0.15]}>
-        <meshStandardMaterial {...QLOGO_MATERIAL} />
-      </Extrude>
-
-      {/* Lighting: a strong ambient fill keeps the dark-metal mesh readable
-          as a visible silhouette at every rotation angle (previously too low,
-          so the logo went nearly invisible except when a specular highlight
-          swept across it), plus two rim lights positioned top-left and
-          bottom-right so the beveled edges continuously catch a highlight
-          as the logo spins, instead of only lighting up briefly. */}
-      <ambientLight intensity={0.8} />
-      <directionalLight position={[3, 4, 5]} intensity={1.2} />
-      <directionalLight position={[-3, -2, 2]} intensity={0.5} />
-      <directionalLight position={[-4, 4, 3]} intensity={1.1} />
-      <directionalLight position={[4, -4, 3]} intensity={1.1} />
+      <mesh geometry={logoGeometry} material={obsidianMirrorMaterial} />
     </group>
   );
 }
 
-export default function Q3DCanvasScene({ scale = 1, className = "" }: { scale?: number; className?: string }) {
+// A fast-orbiting point light, independent of the slow 16s body spin, so a
+// bright specular glint visibly sweeps across the ring/tail's beveled edges
+// every few seconds instead of only reflecting the fixed key/rim lights.
+function GlintLight() {
+  const lightRef = useRef<THREE.PointLight>(null);
+
+  useFrame(({ clock }) => {
+    if (!lightRef.current) return;
+    const angle = (clock.getElapsedTime() / GLINT_PERIOD_SECONDS) * Math.PI * 2;
+    lightRef.current.position.set(
+      Math.cos(angle) * GLINT_ORBIT_RADIUS,
+      Math.sin(angle) * GLINT_ORBIT_RADIUS * GLINT_VERTICAL_COMPRESSION,
+      2.6
+    );
+  });
+
+  return <pointLight ref={lightRef} color="#ffffff" intensity={6} distance={9} decay={2} />;
+}
+
+export default function Q3DCanvasScene({
+  scale = 1,
+  className = "",
+  withBackdrop = false,
+}: {
+  scale?: number;
+  className?: string;
+  /** Pitch-black background + faint ambient particles, for standalone/hero display
+   *  (kept off by default so the small inline logo instances — nav, footer, login
+   *  modal — stay transparent and blend into the page behind them). */
+  withBackdrop?: boolean;
+}) {
+  // Tracks whether the WebGL context/scene has completed its first commit, so
+  // the canvas can fade smoothly into view instead of abruptly "popping in"
+  // once the lazily-loaded chunk finishes mounting — purely a timing/opacity
+  // fix, no colors/lighting/materials are touched.
+  const [isReady, setIsReady] = useState(false);
+
   return (
     <Canvas
       className={className}
+      style={{ opacity: isReady ? 1 : 0, transition: "opacity 400ms ease-out" }}
+      onCreated={() => setIsReady(true)}
       gl={{ alpha: true, antialias: true, toneMapping: THREE.ACESFilmicToneMapping, toneMappingExposure: 1.0 }}
       dpr={[1, 2]}
-      camera={{ fov: 45, near: 0.1, far: 100, position: [0, 0, 7] }}
+      // Slight three-quarter angle: raised and shifted to the right of center so
+      // the ring's right outer edge and top-inner rim catch visible depth/shading
+      // instead of the flat, dead-on silhouette a straight-on [0,0,z] camera gives.
+      camera={{
+        fov: 45,
+        near: 0.1,
+        far: 100,
+        position: [CAMERA_X_OFFSET, CAMERA_Y_ELEVATION, CAMERA_Z_DISTANCE],
+      }}
     >
+      {withBackdrop && (
+        <>
+          <color attach="background" args={["#000000"]} />
+          {/* Faint ambient particles drifting in the dark background. */}
+          <Sparkles count={80} scale={9} size={1.4} speed={0.25} opacity={0.35} color="#ffffff" />
+        </>
+      )}
       {/* Environment loads an HDRI asynchronously; if the fetch fails (e.g. a
           network hiccup or blocked CDN) it throws rather than just suspending,
           which would otherwise crash the whole canvas. Suspense + an error
@@ -135,10 +243,22 @@ export default function Q3DCanvasScene({ scale = 1, className = "" }: { scale?: 
           <Environment preset="studio" />
         </EnvironmentErrorBoundary>
       </Suspense>
-      {/* Lighting now lives inside <QLogo> alongside the material/geometry
-          (ambientLight + two directionalLights), per the fix above — kept
-          here previously as a duplicate set at the Canvas level, which would
-          have doubled up on top of QLogo's own lights and altered the look. */}
+      {/* Raised ambient plus an added front-lower fill light so the ring reads as a
+          consistent obsidian metal all the way around as it spins, instead of the
+          far side falling into total black and only catching highlights on the
+          near side (previously it visibly "switched" between dark and lit
+          mid-rotation). */}
+      <ambientLight intensity={0.45} />
+      {/* Crisp, bright white specular key light from the upper right — this is what
+          produces the sharp mirror-bright highlight along the ring's right outer
+          rim edge. */}
+      <directionalLight position={[5, 5, 4]} intensity={2.6} color="#ffffff" />
+      {/* Soft directional rim light (brand-green tinted) grazing the far edge. */}
+      <directionalLight position={[-6, -6, -4]} intensity={0.35} color={0x8ef08a} />
+      <directionalLight position={[-4, 6, -3]} intensity={1.6} color="#ffffff" />
+      {/* Front-lower fill light — added alongside the raised ambient above. */}
+      <directionalLight position={[4, -5, 5]} intensity={0.8} color="#ffffff" />
+      <GlintLight />
       <QLogo scale={scale} />
     </Canvas>
   );
