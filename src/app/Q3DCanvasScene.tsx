@@ -105,13 +105,19 @@ function QLogo({ scale = 1 }: { scale?: number }) {
   return (
     <group ref={groupRef} scale={[scale, scale, scale]}>
       <mesh geometry={ringGeometry} material={silverPBRMaterial} />
-      {/* Angled and positioned so the inner end tucks behind the ring's lower-right
-          inner edge, and the outer tip extends clearly past the ring's outer radius —
-          matching the reference photo's proportions. */}
+      {/* The blade's long axis starts along local +Y (90°), so it must be rotated by
+          -0.88 - PI/2 (not just -0.88) to actually point radially outward along the
+          -0.88 rad direction — otherwise the blade ends up angled ~90° off from where
+          `position` places it, leaving a visible gap instead of tucking into the ring.
+          With this rotation, the inner end lands inside the ring's stroke (tucked
+          behind its lower-right edge) and the outer tip extends past the ring's
+          outer radius, matching the reference photo's proportions. Rotation/position
+          are static (relative to the group), so the tail still spins together with
+          the ring via the shared groupRef — the overall spin animation is unchanged. */}
       <mesh
         geometry={tailGeometry}
         material={silverPBRMaterial}
-        rotation={[0, 0, -0.88]}
+        rotation={[0, 0, -0.88 - Math.PI / 2]}
         position={[1.65, -1.95, 0]}
       />
     </group>
