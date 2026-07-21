@@ -276,6 +276,9 @@ const FOOTER_LINK_COLUMNS = [
   },
 ] as const;
 
+const HERO_SECONDARY_ACTION_BUTTON_CLASS =
+  "inline-flex items-center justify-center gap-2 py-4 px-5 bg-brandSurface hover:bg-brandSurfaceAccent border border-brandBorder rounded-pill text-sm font-semibold transition-all duration-300 hover:scale-[1.01] hover:border-brandGreen/40 focus:outline-none focus:ring-1 focus:ring-brandGreen/40";
+
 export default function LandingPage() {
   const router = useRouter();
   const [authModalOpen, setAuthModalOpen] = useState(false);
@@ -442,9 +445,6 @@ export default function LandingPage() {
     }
   }
 
-  const heroSecondaryActionButtonClass =
-    "inline-flex items-center justify-center gap-2 py-4 px-5 bg-brandSurface hover:bg-brandSurfaceAccent border border-brandBorder rounded-pill text-sm font-semibold transition-all duration-300 hover:scale-[1.01] hover:border-brandGreen/40 focus:outline-none focus:ring-1 focus:ring-brandGreen/40";
-
   return (
     <div className="bg-brandBg text-white antialiased font-sans overflow-x-hidden selection:bg-brandGreen selection:text-black min-h-screen relative">
       <CustomCursor />
@@ -520,8 +520,8 @@ export default function LandingPage() {
                 <div className="flex-1 h-px bg-white/15" />
               </div>
               <div className="grid grid-cols-2 gap-4">
-                <button type="button" aria-label="Continue with Email" onClick={() => openAuthModal("email")} className={heroSecondaryActionButtonClass}><Mail className={`${PROVIDER_ICON_CLASS} text-white/80`} /><span>Continue with Email</span></button>
-                <button type="button" aria-label="Continue with Phone" onClick={() => openAuthModal("phone")} className={heroSecondaryActionButtonClass}><Phone className={`${PROVIDER_ICON_CLASS} text-white/80`} /><span>Continue with Phone</span></button>
+                <button type="button" onClick={() => openAuthModal("email")} className={HERO_SECONDARY_ACTION_BUTTON_CLASS}><Mail className={`${PROVIDER_ICON_CLASS} text-white/80`} /><span>Continue with Email</span></button>
+                <button type="button" onClick={() => openAuthModal("phone")} className={HERO_SECONDARY_ACTION_BUTTON_CLASS}><Phone className={`${PROVIDER_ICON_CLASS} text-white/80`} /><span>Continue with Phone</span></button>
               </div>
             </div>
           </div>
