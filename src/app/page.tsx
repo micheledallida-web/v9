@@ -483,12 +483,15 @@ export default function LandingPage() {
         )}
         <section className="min-h-screen flex flex-col items-center justify-center px-4 relative overflow-hidden pb-16">
           {/* 3D logo with oval spotlight backdrop */}
-          <div className="relative mb-6 flex items-center justify-center overflow-visible" style={{ width: 144, height: 144 }}>
+          <div
+            className="relative mt-4 mb-6 flex items-center justify-center overflow-visible"
+            style={{ width: 144, height: 144 }}
+          >
             <div
               className="absolute q-logo-backdrop pointer-events-none"
-              style={{ inset: "-45%", transform: "translateY(-18%)", zIndex: 0 }}
+              style={{ inset: "-42%", zIndex: 0 }}
             />
-            <div className="relative z-10 w-full h-full overflow-visible">
+            <div className="relative z-10 flex h-full w-full items-center justify-center overflow-visible">
               <Q3DCanvas scale={1.5} className="w-full h-full" withBackdrop />
             </div>
           </div>

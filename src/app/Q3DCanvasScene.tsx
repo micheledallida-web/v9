@@ -166,7 +166,7 @@ function QLogo({ scale = 1 }: { scale?: number }) {
   });
 
   return (
-    <group ref={groupRef} scale={[scale, scale, scale]}>
+    <group ref={groupRef} position={[-0.12, 0.12, 0]} scale={[scale, scale, scale]}>
       <mesh geometry={logoGeometry} material={obsidianMirrorMaterial} />
     </group>
   );
