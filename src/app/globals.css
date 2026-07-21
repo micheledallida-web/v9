@@ -123,3 +123,32 @@ body {
   90% { opacity: 1; }
   100% { left: 100%; opacity: 0; }
 }
+
+.auth-modal-shell {
+  max-height: calc(100vh - env(safe-area-inset-top) - env(safe-area-inset-bottom) - 2rem);
+}
+
+@supports (height: 100svh) {
+  .auth-modal-shell {
+    max-height: calc(100svh - env(safe-area-inset-top) - env(safe-area-inset-bottom) - 2rem);
+  }
+}
+
+.q-logo-backdrop {
+  border-radius: 9999px;
+  background: radial-gradient(circle at 30% 25%, rgba(255, 255, 255, 0.18), rgba(255, 255, 255, 0.02) 48%, transparent 72%);
+  box-shadow: 0 18px 40px rgba(0, 0, 0, 0.28);
+}
+.wordmark-quickstart {
+  background: linear-gradient(180deg, #f5f5f5 0%, #ffffff 35%, #9a9a9a 55%, #e0e0e0 75%, #b8b8b8 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+.wordmark-ai {
+  background: linear-gradient(180deg, #b6f5b0 0%, #6fdc66 40%, #34a853 70%, #4ee04a 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}

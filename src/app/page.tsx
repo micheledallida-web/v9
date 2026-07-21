@@ -455,7 +455,7 @@ export default function LandingPage() {
         <div className="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between">
           <a href="#" className="flex items-center gap-3 group focus:outline-none focus:ring-2 focus:ring-brandGreen/40 rounded-full px-2" aria-label="QuickStart.Ai Homepage">
             <div className="w-10 h-10 relative overflow-hidden flex items-center justify-center"><Q3DCanvas scale={0.85} className="w-10 h-10 absolute pointer-events-none" /></div>
-            <span className="text-xl font-bold tracking-tight text-white group-hover:text-brandGreen transition-colors duration-300">QuickStart<span className="text-brandGreen">.Ai</span></span>
+            <span className="text-xl font-bold tracking-tight"><span className="wordmark-quickstart">QuickStart</span><span className="wordmark-ai">.Ai</span></span>
           </a>
           <nav className="hidden md:flex items-center gap-8 text-sm font-medium text-brandTextSec">
             <a href="#features" className="hover:text-white transition-colors duration-200">Features</a>
@@ -644,8 +644,8 @@ export default function LandingPage() {
               <div className="relative flex h-10 w-10 items-center justify-center overflow-hidden">
                 <Q3DCanvas scale={0.8} className="absolute h-10 w-10 pointer-events-none" />
               </div>
-              <span className="text-xl font-bold tracking-tight text-white">
-                QuickStart<span className="text-brandGreen">.Ai</span>
+              <span className="text-xl font-bold tracking-tight">
+                <span className="wordmark-quickstart">QuickStart</span><span className="wordmark-ai">.Ai</span>
               </span>
             </a>
             <p className="mt-5 text-sm leading-relaxed text-brandTextSec">

@@ -168,15 +168,15 @@ export default function LoginModal({ isOpen, onClose, onProviderAuth, onEmailSig
   }
 
   const spinningQ = (
-    <div className="mb-3 sm:mb-4 flex justify-center">
-      <div className="w-14 h-14 sm:w-16 sm:h-16">
-        <Q3DCanvas className="w-full h-full" scale={0.7} />
+    <div className="flex justify-center">
+      <div className="q-logo-backdrop h-[4.5rem] w-[4.5rem] sm:h-[5.25rem] sm:w-[5.25rem]">
+        <Q3DCanvas className="h-full w-full" scale={0.82} />
       </div>
     </div>
   );
 
   const heading = (
-    <h2 className="text-[clamp(1.2rem,5vw,2.4rem)] font-semibold leading-[1.1] tracking-tight text-center">
+    <h2 className="max-w-[19rem] text-center text-[clamp(1.2rem,5vw,2.4rem)] font-semibold leading-[1.15] tracking-tight sm:max-w-[21rem]">
       Build Full-Stack
       <br />
       <span className="text-brandGreen">Web &amp; Mobile Apps in Minutes</span>
@@ -184,16 +184,15 @@ export default function LoginModal({ isOpen, onClose, onProviderAuth, onEmailSig
   );
 
   const centeredLogoAndHeading = (
-    <div className="mb-4 flex flex-col items-center text-center">
+    <div className="mb-5 flex flex-col items-center gap-4 text-center sm:mb-6 sm:gap-5">
       {spinningQ}
       {heading}
     </div>
   );
 
   const footerLinks = (
-    <p className="mt-4 sm:mt-6 text-center text-xs sm:text-sm leading-relaxed text-white/45">
-      By continuing, you agree to our
-      <br />
+    <p className="mx-auto max-w-[20rem] text-center text-[11px] leading-[1.55] text-white/45 sm:max-w-[22rem] sm:text-xs">
+      By continuing, you agree to our{" "}
       <a href="#" className="underline underline-offset-4">
         Terms of Service
       </a>{" "}
@@ -205,12 +204,28 @@ export default function LoginModal({ isOpen, onClose, onProviderAuth, onEmailSig
   );
 
   const providerIconClass = PROVIDER_ICON_CLASS;
+  const primaryProviderButtonClass =
+    "flex h-12 w-full items-center justify-center gap-2 rounded-full bg-white px-4 text-sm font-semibold text-[#151515] transition hover:bg-brandGreen disabled:opacity-60 sm:text-base";
   const compactProviderButtonClass =
-    "h-10 rounded-full border border-white/15 bg-brandSurfaceAccent px-3 text-sm font-medium flex items-center justify-center gap-2 hover:border-white/30 transition disabled:opacity-60";
+    "flex h-11 items-center justify-center gap-2 rounded-full border border-white/15 bg-brandSurfaceAccent px-3 text-sm font-medium transition hover:border-white/30 disabled:opacity-60";
+  const alternateMethodButtonClass =
+    "flex h-11 w-full items-center justify-center gap-2 rounded-full border border-white/15 bg-brandSurfaceAccent px-4 text-sm font-semibold transition hover:border-white/30 sm:h-12 sm:text-base";
 
   return (
-      <div className="fixed inset-0 z-[10000] bg-black/80 backdrop-blur-md p-3 sm:p-6 flex items-center justify-center">
-        <div className="w-full max-w-md max-h-[90vh] overflow-y-auto rounded-[28px] border border-brandBorder bg-brandSurface p-4 sm:p-6 text-white relative">
+      <div
+        className="fixed inset-0 z-[10000] flex items-center justify-center bg-black/80 backdrop-blur-md"
+        style={{
+          paddingTop: "max(1rem, env(safe-area-inset-top))",
+          paddingRight: "max(1rem, env(safe-area-inset-right))",
+          paddingBottom: "max(1rem, env(safe-area-inset-bottom))",
+          paddingLeft: "max(1rem, env(safe-area-inset-left))",
+        }}
+      >
+        <div
+          className="auth-modal-shell relative w-full max-w-[27rem] overflow-y-auto overscroll-contain rounded-[30px] border border-brandBorder bg-brandSurface px-4 pb-5 pt-4 text-white shadow-[0_30px_120px_rgba(0,0,0,0.55)] sm:px-6 sm:pb-6 sm:pt-5"
+          role="dialog"
+          aria-modal="true"
+        >
           <div
             className="pointer-events-none absolute inset-0 opacity-50"
             style={{
@@ -220,32 +235,30 @@ export default function LoginModal({ isOpen, onClose, onProviderAuth, onEmailSig
           />
 
           <div className="relative z-10">
-            <div className="mb-3 sm:mb-4 flex items-center justify-start">
-              <button
-                onClick={handleClose}
-                className="h-9 w-9 rounded-full border border-white/20 text-white/80 hover:text-white hover:border-white/40 transition"
-                aria-label="Close login modal"
-              >
-                ✕
-              </button>
-            </div>
+            <button
+              onClick={handleClose}
+              className="absolute right-0 top-0 flex h-9 w-9 items-center justify-center rounded-full border border-white/20 text-white/80 transition hover:border-white/40 hover:text-white"
+              aria-label="Close login modal"
+            >
+              ✕
+            </button>
 
             {authStep === "options" && (
-              <div className="flex flex-col items-center">
+              <div className="flex flex-col items-center pt-2 text-center sm:pt-1">
                 {spinningQ}
                 {heading}
 
-                <div className="mt-4 sm:mt-6 w-full space-y-2.5 sm:space-y-3">
+                <div className="mt-6 w-full space-y-3 sm:mt-7">
                   <ProviderButton
                     provider="Google"
                     onProviderAuth={onProviderAuth}
-                    className="w-full h-11 sm:h-12 rounded-full bg-white text-[#151515] text-sm sm:text-base font-semibold flex items-center justify-center gap-2 hover:bg-brandGreen transition disabled:opacity-60"
+                    className={primaryProviderButtonClass}
                   >
                     <GoogleIcon className={providerIconClass} />
                     Continue with Google
                   </ProviderButton>
 
-                  <div className="grid grid-cols-3 gap-2">
+                  <div className="grid grid-cols-3 gap-2.5">
                     <ProviderButton
                       provider="GitHub"
                       onProviderAuth={onProviderAuth}
@@ -272,7 +285,7 @@ export default function LoginModal({ isOpen, onClose, onProviderAuth, onEmailSig
                     </ProviderButton>
                   </div>
 
-                  <div className="flex items-center gap-3 py-1">
+                  <div className="flex items-center gap-3 py-0.5">
                     <div className="flex-1 h-px bg-white/15" />
                     <span className="text-white/45 text-xs sm:text-sm font-medium tracking-widest">OR</span>
                     <div className="flex-1 h-px bg-white/15" />
@@ -280,7 +293,7 @@ export default function LoginModal({ isOpen, onClose, onProviderAuth, onEmailSig
 
                   <button
                     onClick={() => setAuthStep("email")}
-                    className="w-full h-11 sm:h-12 rounded-full border border-white/15 bg-brandSurfaceAccent text-sm sm:text-base font-semibold flex items-center justify-center gap-2 hover:border-white/30 transition"
+                    className={alternateMethodButtonClass}
                   >
                     <Mail className={`${providerIconClass} text-white/80`} />
                     Continue with Email
@@ -291,14 +304,14 @@ export default function LoginModal({ isOpen, onClose, onProviderAuth, onEmailSig
                       setAuthStep("phone");
                       setCountryDropdownOpen(false);
                     }}
-                    className="w-full h-11 sm:h-12 rounded-full border border-white/15 bg-brandSurfaceAccent text-sm sm:text-base font-semibold flex items-center justify-center gap-2 hover:border-white/30 transition"
+                    className={alternateMethodButtonClass}
                   >
                     <Phone className={`${providerIconClass} text-white/80`} />
                     Continue with Phone
                   </button>
                 </div>
 
-                {footerLinks}
+                <div className="mt-5 w-full sm:mt-6">{footerLinks}</div>
               </div>
             )}
 
