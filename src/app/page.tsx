@@ -481,7 +481,10 @@ export default function LandingPage() {
         <section className="min-h-screen flex flex-col items-center justify-center px-4 relative overflow-hidden pb-16">
           {/* 3D logo with oval spotlight backdrop */}
           <div className="relative mb-6 flex items-center justify-center overflow-visible" style={{ width: 144, height: 144 }}>
-            <div className="absolute q-logo-backdrop pointer-events-none" style={{ inset: '-55%', zIndex: 0 }} />
+            <div
+              className="absolute q-logo-backdrop pointer-events-none"
+              style={{ top: "-45%", left: "-45%", right: "-45%", bottom: "-5%", zIndex: 0 }}
+            />
             <div className="relative z-10 w-full h-full overflow-visible">
               <Q3DCanvas scale={1.5} className="w-full h-full" withBackdrop />
             </div>
@@ -495,28 +498,6 @@ export default function LandingPage() {
               <span style={{ color: "#70F39B" }}>Web &amp; Mobile Apps in Minutes</span>
             </h1>
           </div>
-
-          {/* Toggle link below headline */}
-          <p className="text-center text-sm text-white/50 mb-8 z-20 reveal-element active">
-            Don&apos;t have an account?{" "}
-            <button
-              type="button"
-              onClick={() => openAuthModal("email")}
-              className="underline underline-offset-4 transition-opacity hover:opacity-80"
-              style={{ color: "#70F39B" }}
-            >
-              Sign up
-            </button>
-            {" · "}
-            <button
-              type="button"
-              onClick={() => openAuthModal("signin")}
-              className="underline underline-offset-4 transition-opacity hover:opacity-80"
-              style={{ color: "#70F39B" }}
-            >
-              Sign in
-            </button>
-          </p>
 
           {/* Auth area — ref on this div so sticky header CTA appears once it scrolls out of view */}
           <div id="signup" ref={heroAuthButtonsRowRef} className="w-full max-w-md mx-auto z-20 reveal-element active">
