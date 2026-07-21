@@ -1,11 +1,29 @@
 "use client";
 
-import { useMemo, useRef } from "react";
+import { Component, Suspense, useMemo, useRef, type ReactNode } from "react";
 import { Canvas, useFrame } from "@react-three/fiber";
 import { Environment } from "@react-three/drei";
 import * as THREE from "three";
 
 const ROTATION_PERIOD_SECONDS = 16; // one full revolution every 16s, constant/linear
+
+class EnvironmentErrorBoundary extends Component<{ children: ReactNode }, { hasError: boolean }> {
+  state = { hasError: false };
+
+  static getDerivedStateFromError() {
+    return { hasError: true };
+  }
+
+  componentDidCatch(error: unknown) {
+    // eslint-disable-next-line no-console
+    console.warn("Q3DCanvas: failed to load studio environment, rendering without it.", error);
+  }
+
+  render() {
+    if (this.state.hasError) return null;
+    return this.props.children;
+  }
+}
 
 function QLogo({ scale = 1 }: { scale?: number }) {
   const groupRef = useRef<THREE.Group>(null);
@@ -108,7 +126,16 @@ export default function Q3DCanvasScene({ scale = 1, className = "" }: { scale?: 
       dpr={[1, 2]}
       camera={{ fov: 45, near: 0.1, far: 100, position: [0, 0, 7] }}
     >
-      <Environment preset="studio" />
+      {/* Environment loads an HDRI asynchronously; if the fetch fails (e.g. a
+          network hiccup or blocked CDN) it throws rather than just suspending,
+          which would otherwise crash the whole canvas. Suspense + an error
+          boundary let the logo still render (without env reflections) instead
+          of taking down the page. */}
+      <Suspense fallback={null}>
+        <EnvironmentErrorBoundary>
+          <Environment preset="studio" />
+        </EnvironmentErrorBoundary>
+      </Suspense>
       <ambientLight intensity={0.45} />
       <directionalLight position={[5, 5, 4]} intensity={1.8} />
       <directionalLight position={[-6, -6, -4]} intensity={0.35} color={0x8ef08a} />
