@@ -270,6 +270,7 @@ export default function LoginModal({ isOpen, onClose, onProviderAuth, onEmailSig
       <main
         className="relative z-10 mx-auto flex w-full max-w-md flex-1 flex-col justify-center px-6 py-8"
         style={{
+          paddingTop: "max(2rem, env(safe-area-inset-top))",
           paddingBottom: "max(2rem, env(safe-area-inset-bottom))",
         }}
       >
