@@ -49,7 +49,7 @@ const CAMERA_Y_ELEVATION = 1.7; // raise above center, toward the top-inner rim
 // frustum at every angle of the 360° Y-axis spin, instead of just clearing
 // the ring alone — this is what stops the tail tip from hard-clipping
 // against the canvas edges as it rotates through.
-const CAMERA_Z_DISTANCE = 7.4;
+const CAMERA_Z_DISTANCE = 9.5;
 
 // GlintLight config: a fast-orbiting point light, independent of the slow 16s
 // body spin, so a bright specular glint visibly sweeps across the ring/tail's
@@ -167,7 +167,7 @@ function QLogo({ scale = 1 }: { scale?: number }) {
 
   return (
     <group ref={groupRef} position={[-0.12, 0.12, 0]} scale={[scale, scale, scale]}>
-      <mesh geometry={logoGeometry} material={obsidianMirrorMaterial} />
+      <mesh geometry={logoGeometry} material={obsidianMirrorMaterial} frustumCulled={false} />
     </group>
   );
 }
